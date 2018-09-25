@@ -30,7 +30,6 @@ deploy_job:
     paths:
       - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
   script:
-  - 'cd src/UI/Web/bin/Debug/netcoreapp2.1/publish'
   - 'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
   - 'cf push -f manifest-Web.yml'
   dependencies:
