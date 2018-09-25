@@ -21,7 +21,6 @@ test_job:
   script:
     - 'dotnet test tests/UnitTests'
     - 'dotnet test tests/IntegrationTests'
-    - 'dotnet test tests/FunctionalTests'
   dependencies:
     - build_job
 
