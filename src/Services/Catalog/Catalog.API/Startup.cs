@@ -22,7 +22,7 @@ using Microsoft.eShopOnContainers.Services.Catalog.API.IntegrationEvents.EventHa
 using Microsoft.eShopOnContainers.Services.Catalog.API.IntegrationEvents.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.HealthChecks;
+//using Microsoft.Extensions.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pivotal.Discovery.Client;
@@ -31,6 +31,10 @@ using System;
 using System.Data.Common;
 using System.Reflection;
 using Steeltoe.CloudFoundry.Connector.SqlServer.EFCore;
+using Steeltoe.Management.CloudFoundry;
+using Steeltoe.Management.Endpoint.CloudFoundry;
+using Steeltoe.Common.HealthChecks;
+using Steeltoe.Management.Endpoint.Info;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API
 {
@@ -51,8 +55,10 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
                 .AddCustomOptions(Configuration)
                 .AddIntegrationServices(Configuration)
                 .AddEventBus(Configuration)
-                .AddDiscoveryClient(Configuration)
+                .AddDiscoveryClient(Configuration)                
                 .AddSwagger();
+
+            services.AddCloudFoundryActuators(Configuration);
 
             var container = new ContainerBuilder();
             container.Populate(services);
@@ -82,7 +88,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
             app.UseCors("CorsPolicy");
 
             app.UseMvcWithDefaultRoute();
-            
+            app.UseCloudFoundryActuators();
             app.UseDiscoveryClient();
 
             app.UseSwagger()
@@ -126,22 +132,22 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
         public static IServiceCollection AddCustomMVC(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHealthChecks(checks =>
-            {
-                var minutes = 1;
-                if (int.TryParse(configuration["HealthCheck:Timeout"], out var minutesParsed))
-                {
-                    minutes = minutesParsed;
-                }
-                checks.AddSqlCheck("CatalogDb", configuration["ConnectionString"], TimeSpan.FromMinutes(minutes));
+            // services.AddHealthChecks(checks =>
+            // {
+            //     var minutes = 1;
+            //     if (int.TryParse(configuration["HealthCheck:Timeout"], out var minutesParsed))
+            //     {
+            //         minutes = minutesParsed;
+            //     }
+            //     checks.AddSqlCheck("CatalogDb", configuration["ConnectionString"], TimeSpan.FromMinutes(minutes));
 
-                var accountName = configuration.GetValue<string>("AzureStorageAccountName");
-                var accountKey = configuration.GetValue<string>("AzureStorageAccountKey");
-                if (!string.IsNullOrEmpty(accountName) && !string.IsNullOrEmpty(accountKey))
-                {
-                    checks.AddAzureBlobStorageCheck(accountName, accountKey);
-                }
-            });
+            //     var accountName = configuration.GetValue<string>("AzureStorageAccountName");
+            //     var accountKey = configuration.GetValue<string>("AzureStorageAccountKey");
+            //     if (!string.IsNullOrEmpty(accountName) && !string.IsNullOrEmpty(accountKey))
+            //     {
+            //         checks.AddAzureBlobStorageCheck(accountName, accountKey);
+            //     }
+            // });
 
             services.AddMvc(options =>
             {

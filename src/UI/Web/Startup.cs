@@ -20,6 +20,10 @@ using Pivotal.Discovery.Client;
 using Steeltoe.Common.Discovery;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
+using Steeltoe.Management.CloudFoundry;
+using Steeltoe.Management.Endpoint.CloudFoundry;
+using Steeltoe.Common.HealthChecks;
+using Steeltoe.Management.Endpoint.Info;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -127,7 +131,8 @@ namespace Microsoft.eShopWeb.Web
             //services.AddHttpClient<ICatalogService, CatalogService>();
 
             services.AddMvc();
-
+            
+            services.AddCloudFoundryActuators(Configuration);
             services.AddDiscoveryClient(Configuration);
 
             services.AddSingleton<ICatalogService>(sp =>
@@ -164,6 +169,7 @@ namespace Microsoft.eShopWeb.Web
             app.UseAuthentication();
 
             app.UseMvc();
+            app.UseCloudFoundryActuators();
             app.UseDiscoveryClient();
         }
 
