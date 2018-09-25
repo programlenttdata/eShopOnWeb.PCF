@@ -35,11 +35,12 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
+                .ConfigureAppConfiguration(c => c.AddCloudFoundry())
                 .UseCloudFoundryHosting()
                 .AddCloudFoundry()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
-                .UseHealthChecks("/hc")
+                //.UseHealthChecks("/hc")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseWebRoot("Pics")
                 // .ConfigureAppConfiguration((builderContext, config) =>
