@@ -54,7 +54,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\EventBus\EventBusRabbitMQ\EventBusRabbitMQ.csproj" />
     <ProjectReference Include="..\..\..\Common\EventBus\EventBusServiceBus\EventBusServiceBus.csproj" />
-    <ProjectReference Include="..\..\..\CommonEventBus\EventBus\EventBus.csproj" />
+    <ProjectReference Include="..\..\..\Common\EventBus\EventBus\EventBus.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks.AzureStorage\Microsoft.Extensions.HealthChecks.AzureStorage.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks.SqlServer\Microsoft.Extensions.HealthChecks.SqlServer.csproj" />
