@@ -1,4 +1,4 @@
-image: nttdatapcf/demoimages:latest
+image: microsoft/dotnet:latest
 
 stages:
   - build
