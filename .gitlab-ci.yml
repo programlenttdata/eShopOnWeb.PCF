@@ -18,6 +18,8 @@ build_job_web:
         dotnet restore
         dotnet build
         dotnet publish
+      else
+        exit 0
       fi;
 
 test_job_web:
