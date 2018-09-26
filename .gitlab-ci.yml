@@ -12,7 +12,7 @@ build_job_web:
       - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
   script:
     - >
-      if git diff HEAD~ --name-only|grep src/UI/Web; then
+      if git diff HEAD~ --name-only|grep src/UI/; then
         'cd src/UI/Web'
         'dotnet restore'
         'dotnet build '
@@ -33,9 +33,11 @@ deploy_job_web:
     paths:
       - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
   script:
-  - 'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
-  - 'cf push -f manifest-Web.yml'
+    - >
+      if git diff HEAD~ --name-only|grep src/UI/; then
+        'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
+        'cf push -f manifest-Web.yml'
+      fi;
   dependencies:
     - build_job_web
     - test_job_web
-  
