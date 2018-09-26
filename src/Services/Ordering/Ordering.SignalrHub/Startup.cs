@@ -96,7 +96,7 @@ namespace Ordering.SignalrHub
                 });
             }
 
-            ConfigureAuthService(services);
+            //ConfigureAuthService(services);
 
             RegisterEventBus(services);
 

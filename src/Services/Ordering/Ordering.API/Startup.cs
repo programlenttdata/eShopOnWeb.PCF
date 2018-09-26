@@ -55,8 +55,8 @@
                 .AddCustomSwagger(Configuration)
                 .AddCustomIntegrations(Configuration)
                 .AddCustomConfiguration(Configuration)
-                .AddEventBus(Configuration)
-                .AddCustomAuthentication(Configuration);
+                .AddEventBus(Configuration);
+              //  .AddCustomAuthentication(Configuration);
 
             //configure autofac
 
@@ -96,8 +96,8 @@
                .UseSwaggerUI(c =>
                {
                    c.SwaggerEndpoint($"{ (!string.IsNullOrEmpty(pathBase) ? pathBase : string.Empty) }/swagger/v1/swagger.json", "Ordering.API V1");
-                   c.OAuthClientId("orderingswaggerui");
-                   c.OAuthAppName("Ordering Swagger UI");
+              //     c.OAuthClientId("orderingswaggerui");
+              //     c.OAuthAppName("Ordering Swagger UI");
                });
 
             ConfigureEventBus(app);
@@ -227,7 +227,7 @@
                     Description = "The Ordering Service HTTP API",
                     TermsOfService = "Terms Of Service"
                 });
-
+                /*
                 options.AddSecurityDefinition("oauth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
@@ -239,6 +239,7 @@
                         { "orders", "Ordering API" }
                     }
                 });
+                */
 
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
