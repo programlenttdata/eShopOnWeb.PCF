@@ -19,7 +19,8 @@ build_job_web:
         dotnet build
         dotnet publish
       else
-        exit 0
+        echo "Skipping Web build coz no change was detected in the Web project"
+        exit -1
       fi;
 
 test_job_web:
