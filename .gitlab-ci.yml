@@ -83,17 +83,17 @@ deploy_job_web:
     - build_job_web
     - test_job_web
 
-  deploy_job_catalog:
-    stage: deploy
-    artifacts:
-      paths:
-        - 'src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish'
-    script:
-      - |
-        if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
-          'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
-          'cf push -f manifest-Catalog.yml'
-        fi;
-    dependencies:
-      - build_job_catalog
-      - test_job_catalog
+deploy_job_catalog:
+  stage: deploy
+  artifacts:
+    paths:
+      - 'src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
+        'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
+        'cf push -f manifest-Catalog.yml'
+      fi;
+  dependencies:
+    - build_job_catalog
+    - test_job_catalog
