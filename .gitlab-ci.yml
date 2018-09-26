@@ -20,7 +20,7 @@ build_job_web:
         dotnet publish
       else
         echo "Skipping Web build coz no change was detected in the Web project"
-        exit 0
+        exit -1
       fi;
 
 build_job_catalog:
@@ -38,7 +38,7 @@ build_job_catalog:
         dotnet publish
       else
         echo "Skipping Catalog.API build coz no change was detected in the Catalog.API project"
-        exit 0
+        exit -1
       fi;
 
 test_job_web:
@@ -50,7 +50,7 @@ test_job_web:
         dotnet test tests/IntegrationTests
       else
         echo "Skipping Web tests coz no change was detected in the Web test project"
-        exit 0
+        exit -1
       fi;
   dependencies:
     - build_job_web
@@ -63,10 +63,10 @@ test_job_catalog:
         dotnet test src/Services/Catalog/Catalog.UnitTests/UnitTests
       else
         echo "Skipping Catalog.API tests coz no change was detected in the Catalog.API test project"
-        exit 0
+        exit -1
       fi;
   dependencies:
-    - build_job_web
+    - build_job_catalog
 
 deploy_job_web:
   stage: deploy
@@ -78,6 +78,9 @@ deploy_job_web:
       if git diff HEAD~ --name-only|grep src/UI/; then
         'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
         'cf push -f manifest-Web.yml'
+      else
+        echo "Skipping Web deploy coz no change was detected in the Web project"
+        exit -1
       fi;
   dependencies:
     - build_job_web
@@ -93,6 +96,9 @@ deploy_job_catalog:
       if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
         'cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -s eshop'
         'cf push -f manifest-Catalog.yml'
+      else
+        echo "Skipping Catalog.API deploy coz no change was detected in the Catalog.API project"
+        exit -1
       fi;
   dependencies:
     - build_job_catalog
