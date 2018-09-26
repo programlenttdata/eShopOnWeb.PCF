@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
 		<PackageReference Include="xunit" Version="2.3.1" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
@@ -14,9 +14,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\ApplicationCore\ApplicationCore.csproj" />
-		<ProjectReference Include="..\..\src\WebRazorPages\WebRazorPages.csproj" />
-		<ProjectReference Include="..\..\src\Web\Web.csproj" />
+		<ProjectReference Include="..\..\src\UI\ApplicationCore\ApplicationCore.csproj" />
+		<ProjectReference Include="..\..\src\UI\Infrastructure\Infrastructure.csproj" />
+		<ProjectReference Include="..\..\src\UI\Web\Web.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

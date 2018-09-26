@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Web\Web.csproj" />
+		<ProjectReference Include="..\..\src\UI\Web\Web.csproj" />
 		<ProjectReference Include="..\UnitTests\UnitTests.csproj" />
 	</ItemGroup>
 
