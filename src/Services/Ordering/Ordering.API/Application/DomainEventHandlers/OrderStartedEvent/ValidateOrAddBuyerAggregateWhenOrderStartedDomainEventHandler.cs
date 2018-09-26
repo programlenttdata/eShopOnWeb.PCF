@@ -27,7 +27,7 @@ namespace Ordering.API.Application.DomainEventHandlers.OrderStartedEvent
             IOrderingIntegrationEventService orderingIntegrationEventService)
         {
             _buyerRepository = buyerRepository ?? throw new ArgumentNullException(nameof(buyerRepository));
-            _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
+            // _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
             _orderingIntegrationEventService = orderingIntegrationEventService ?? throw new ArgumentNullException(nameof(orderingIntegrationEventService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }

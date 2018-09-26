@@ -1,4 +1,6 @@
-﻿namespace Microsoft.eShopOnContainers.Services.Ordering.API
+﻿using Microsoft.AspNetCore.Mvc.Authorization;
+
+namespace Microsoft.eShopOnContainers.Services.Ordering.API
 {
     using AspNetCore.Http;
     using Autofac;
@@ -50,7 +52,7 @@
         {
             services.AddApplicationInsights(Configuration)
                 .AddCustomMvc()
-                .AddHealthChecks(Configuration)
+                //.AddHealthChecks(Configuration)
                 .AddCustomDbContext(Configuration)
                 .AddCustomSwagger(Configuration)
                 .AddCustomIntegrations(Configuration)
@@ -124,7 +126,7 @@
                 app.UseMiddleware<ByPassAuthMiddleware>();
             }
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
         }
     }
 
@@ -155,6 +157,7 @@
             // Add framework services.
             services.AddMvc(options =>
             {
+                options.Filters.Add(new AllowAnonymousFilter());
                 options.Filters.Add(typeof(HttpGlobalExceptionFilter));
             }).AddControllersAsServices();  //Injecting Controllers themselves thru DI
                                             //For further info see: http://docs.autofac.org/en/latest/integration/aspnetcore.html#controllers-as-services
@@ -241,7 +244,7 @@
                 });
                 */
 
-                options.OperationFilter<AuthorizeCheckOperationFilter>();
+                //options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
             return services;

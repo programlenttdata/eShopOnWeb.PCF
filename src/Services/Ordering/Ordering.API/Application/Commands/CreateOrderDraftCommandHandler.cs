@@ -23,7 +23,7 @@
         // Using DI to inject infrastructure persistence Repositories
         public CreateOrderDraftCommandHandler(IMediator mediator,  IIdentityService identityService)
         {
-            _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
+            //_identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 

@@ -26,7 +26,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
 
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _orderQueries = orderQueries ?? throw new ArgumentNullException(nameof(orderQueries));
-            _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
+            //_identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
         }
 
         [Route("cancel")]
@@ -87,10 +87,21 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetOrders()
         {
-            var userid = _identityService.GetUserIdentity();
-            var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.Parse(userid));
+            //var userid = _identityService.GetUserIdentity();
+            //var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.Parse(userid));
+            var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.NewGuid());
             return Ok(orders);
         }
+        [Route("GetOrdersByUserId")]
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetOrders(Guid Userid)
+        {
+            //var userid = _identityService.GetUserIdentity();
+            var orders = await _orderQueries.GetOrdersFromUserAsync(Userid);
+            return Ok(orders);
+        }
+
 
         [Route("cardtypes")]
         [HttpGet]

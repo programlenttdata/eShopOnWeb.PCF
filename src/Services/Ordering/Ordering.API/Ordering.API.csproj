@@ -21,7 +21,6 @@
     <ProjectReference Include="..\..\..\Common\EventBus\EventBusServiceBus\EventBusServiceBus.csproj" />
     <ProjectReference Include="..\..\..\Common\EventBus\EventBus\EventBus.csproj" />
     <ProjectReference Include="..\..\..\Common\EventBus\IntegrationEventLogEF\IntegrationEventLogEF.csproj" />
-    <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks.SqlServer\Microsoft.Extensions.HealthChecks.SqlServer.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks\Microsoft.Extensions.HealthChecks.csproj" />
     <ProjectReference Include="..\..\..\Common\WebHostCustomization\WebHost.Customization\WebHost.Customization.csproj" />
