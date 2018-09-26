@@ -4,7 +4,7 @@
 		<TargetFramework>netcoreapp2.1</TargetFramework>
 		<RootNamespace>Microsoft.eShopWeb.Web</RootNamespace>
 	</PropertyGroup>
-    
+     
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="1.50.5" />
 		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />

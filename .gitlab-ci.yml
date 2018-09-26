@@ -14,10 +14,10 @@ build_job_web:
     - |
       if git diff HEAD~ --name-only|grep src/UI/; then
         pwd
-        'cd src/UI/Web'
-        'dotnet restore'
-        'dotnet build '
-        'dotnet publish'
+        cd src/UI/Web
+        dotnet restore
+        dotnet build
+        dotnet publish
       fi;
 
 test_job_web:
