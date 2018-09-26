@@ -22,6 +22,7 @@ build_job_web:
         echo "Skipping Web build coz no change was detected in the Web project"
         exit 1
       fi;
+  allow_failure: true
 
 build_job_catalog:
   stage: build
@@ -40,6 +41,7 @@ build_job_catalog:
         echo "Skipping Catalog.API build coz no change was detected in the Catalog.API project"
         exit 1
       fi;
+  allow_failure: true
 
 test_job_web:
   stage: test
@@ -54,6 +56,7 @@ test_job_web:
       fi;
   dependencies:
     - build_job_web
+  allow_failure: true
 
 test_job_catalog:
   stage: test
@@ -67,6 +70,7 @@ test_job_catalog:
       fi;
   dependencies:
     - build_job_catalog
+  allow_failure: true
 
 deploy_job_web:
   stage: deploy
@@ -85,6 +89,7 @@ deploy_job_web:
   dependencies:
     - build_job_web
     - test_job_web
+  allow_failure: true
 
 deploy_job_catalog:
   stage: deploy
@@ -103,3 +108,4 @@ deploy_job_catalog:
   dependencies:
     - build_job_catalog
     - test_job_catalog
+  allow_failure: true
