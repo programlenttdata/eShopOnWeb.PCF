@@ -82,7 +82,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             }
         }
 
-        [Route("")]
+        [Route("{UserId:Guid}")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetOrders()
@@ -92,13 +92,12 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.NewGuid());
             return Ok(orders);
         }
-        [Route("GetOrdersByUserId")]
+        [Route("GetOrdersByUserId/{UserId:string}")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetOrders(Guid Userid)
+        public async Task<IActionResult> GetOrders(string UserId)
         {
-            //var userid = _identityService.GetUserIdentity();
-            var orders = await _orderQueries.GetOrdersFromUserAsync(Userid);
+            var orders = await _orderQueries.GetOrdersFromUserAsync(UserId);
             return Ok(orders);
         }
 
@@ -121,7 +120,15 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var draft  = await _mediator.Send(createOrderDraftCommand);
             return Ok(draft);
         }
+        [Route("PlaceOrder")]
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand createOrderCommand)
+        {
+            var order= await _mediator.Send(createOrderCommand);
+            return Ok(order);
+        }
     }
+
 }
 
 

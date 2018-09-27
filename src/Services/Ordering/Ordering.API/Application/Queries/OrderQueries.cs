@@ -17,6 +17,7 @@
         }
 
 
+
         public async Task<Order> GetOrderAsync(int id)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -42,7 +43,7 @@
             }
         }
 
-        public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(Guid userId)
+        public async Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(string userId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -100,6 +101,11 @@
             }
 
             return order;
+        }
+
+        public Task<IEnumerable<OrderSummary>> GetOrdersFromUserAsync(Guid userId)
+        {
+            return  GetOrdersFromUserAsync(userId.ToString());
         }
     }
 }

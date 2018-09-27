@@ -26,9 +26,9 @@
                 return $"{baseUri}/{orderId}";
             }
 
-            public static string GetAllMyOrders(string baseUri)
+            public static string GetAllMyOrders(string baseUri, string UserId)
             {
-                return baseUri;
+                return $"{baseUri}/GetOrdersByUserId/{UserId}";
             }
 
             public static string AddNewOrder(string baseUri)
@@ -45,6 +45,9 @@
             {
                 return $"{baseUri}/ship";
             }
+            
+            public static string PlaceOrder(string baseUri) => $"{baseUri}/order/directorder";
+            
         }
 
         public static class Catalog

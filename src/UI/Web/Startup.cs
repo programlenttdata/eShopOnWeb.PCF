@@ -25,6 +25,7 @@ using Steeltoe.Management.Endpoint.CloudFoundry;
 using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
 
+
 namespace Microsoft.eShopWeb.Web
 {
     public class Startup
@@ -104,6 +105,7 @@ namespace Microsoft.eShopWeb.Web
             services.AddScoped<IBasketViewModelService, BasketViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<CatalogService>();
             services.Configure<CatalogSettings>(Configuration);
             services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));

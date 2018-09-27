@@ -7,6 +7,7 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using System.Linq;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.eShopWeb.Web.Services;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
@@ -15,14 +16,17 @@ namespace Microsoft.eShopWeb.Web.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IOrderingService  _orderService;
 
-        public OrderController(IOrderRepository orderRepository) {
+        public OrderController(IOrderingService  orderingService, IOrderRepository orderRepository) {
+            _orderService = orderingService;
             _orderRepository = orderRepository;
         }
         
         public async Task<IActionResult> Index()
         {
-            var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
+            var orders =  await _orderService.GetMyOrders(User.Identity.Name);
+          //  var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity));
 
             var viewModel = orders
                 .Select(o => new OrderViewModel()
@@ -49,6 +53,9 @@ namespace Microsoft.eShopWeb.Web.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> Detail(int orderId)
         {
+ 
+
+            var customerorders =  await _orderService.GetMyOrders(User.Identity.Name);
             var customerOrders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
             var order = customerOrders.FirstOrDefault(o => o.Id == orderId);
             if (order == null)

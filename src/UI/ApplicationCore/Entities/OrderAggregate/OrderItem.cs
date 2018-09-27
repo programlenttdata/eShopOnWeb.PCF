@@ -20,5 +20,6 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate
             UnitPrice = unitPrice;
             Units = units;
         }
+        
     }
 }

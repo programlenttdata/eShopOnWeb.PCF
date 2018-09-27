@@ -2,10 +2,16 @@
 using Ardalis.GuardClauses;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using System;
+using Bogus;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
+using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate
 {
+
+
     public class Order : BaseEntity, IAggregateRoot
     {
         private Order()
@@ -50,4 +56,93 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate
             return total;
         }
     }
+}
+
+namespace NTTData.eShopMonoToMicro.Entities.Orders
+{
+    public static class BasketItemExtensions
+    {
+        public static IEnumerable<OrderItemDTO> ToOrderItemsDTO(this IEnumerable<BasketItem> basketItems)
+        {
+            foreach (var item in basketItems)
+            {
+                yield return item.ToOrderItemDTO();
+            }
+        }
+
+        public static OrderItemDTO ToOrderItemDTO(this BasketItem item)
+        {
+            return new OrderItemDTO()
+            {
+                ProductId = item.Id,
+                ProductName = item.CatalogItemId.ToString(),
+                PictureUrl = "",
+                UnitPrice = item.UnitPrice,
+                Units = item.Quantity
+            };
+        }
+    }
+
+
+    public class OrderItemDTO
+    {
+        public int ProductId { get; set; }
+
+        public string ProductName { get; set; }
+
+        public decimal UnitPrice { get; set; }
+
+        public decimal Discount { get; set; }
+
+        public int Units { get; set; }
+
+        public string PictureUrl { get; set; }
+    }
+
+    public class CreateOrderCommand
+    {
+        private readonly IEnumerable<OrderItemDTO> _orderItems;
+        public string UserId { get; set; }
+
+        public string UserName { get; set; }
+
+        public string City { get; set; }
+
+        public string Street { get; set; }
+
+        public string State { get; set; }
+
+        public string Country { get; set; }
+        public string ZipCode { get; set; }
+        public string CardNumber { get; set; }
+        public string CardHolderName { get; set; }
+        public DateTime CardExpiration { get; set; }
+        public string CardSecurityNumber { get; set; }
+        public int CardTypeId { get; set; }
+        public IEnumerable<OrderItemDTO> OrderItems => _orderItems;
+        public CreateOrderCommand(string Username, string buyerId, Address address, IReadOnlyCollection<BasketItem> basketItems)
+        {
+            Randomizer.Seed = new Random(91239122);
+            var faker = new Faker("en");
+
+            //string userId, string userName, string city, string street, string state, string country, string zipcode,
+            //string cardNumber, string cardHolderName, DateTime cardExpiration,
+            //string cardSecurityNumber, int cardTypeId
+            List<BasketItem> basketList = new List<BasketItem>(basketItems);
+            _orderItems = BasketItemExtensions.ToOrderItemsDTO(basketList);
+            UserId = buyerId; //buyerId is actually an email
+            UserName = Username;
+            City = address.City;
+            Street = address.Street;
+            State = address.State;
+            Country = address.Country;
+            ZipCode = address.ZipCode;
+            CardNumber = faker.Finance.CreditCardNumber();
+            CardExpiration = faker.Date.Future(4);
+            CardSecurityNumber = faker.Finance.CreditCardCvv();
+            CardTypeId = 1;
+        }
+
+    }
+
 }
