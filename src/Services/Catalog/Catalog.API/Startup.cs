@@ -35,6 +35,7 @@ using Steeltoe.Management.CloudFoundry;
 using Steeltoe.Management.Endpoint.CloudFoundry;
 using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
+using Steeltoe.CloudFoundry.Connector.RabbitMQ;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API
 {
@@ -55,7 +56,8 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
                 .AddCustomOptions(Configuration)
                 .AddIntegrationServices(Configuration)
                 .AddEventBus(Configuration)
-                .AddDiscoveryClient(Configuration)                
+                .AddDiscoveryClient(Configuration) 
+                .AddRabbitMQConnection(Configuration)               
                 .AddSwagger();
 
             services.AddCloudFoundryActuators(Configuration);
@@ -249,37 +251,41 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
             }
             else
             {
-                services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
-                {
-                    var settings = sp.GetRequiredService<IOptions<CatalogSettings>>().Value;
-                    var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
+                // services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+                // {
+                //     var settings = sp.GetRequiredService<IOptions<CatalogSettings>>().Value;
+                //     var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
 
-                    var factory = new ConnectionFactory()
-                    {
-                        HostName = configuration["EventBusConnection"],
-                        VirtualHost = configuration["EventBusVirtualHost"],
-                        //Port = int.Parse(configuration["EventBusPort"]),
-                        RequestedHeartbeat = 60     
-                    };
+                //     var factory = new ConnectionFactory()
+                //     {
+                //         HostName = configuration["EventBusConnection"],
+                //         //VirtualHost = configuration["EventBusVirtualHost"],
+                //         RequestedHeartbeat = 60     
+                //     };
 
-                    if (!string.IsNullOrEmpty(configuration["EventBusUserName"]))
-                    {
-                        factory.UserName = configuration["EventBusUserName"];
-                    }
+                //     if (!string.IsNullOrEmpty(configuration["EventBusVirtualHost"]))
+                //     {
+                //         factory.VirtualHost = configuration["EventBusVirtualHost"];
+                //     }
 
-                    if (!string.IsNullOrEmpty(configuration["EventBusPassword"]))
-                    {
-                        factory.Password = configuration["EventBusPassword"];
-                    }
+                //     if (!string.IsNullOrEmpty(configuration["EventBusUserName"]))
+                //     {
+                //         factory.UserName = configuration["EventBusUserName"];
+                //     }
 
-                    var retryCount = 5;
-                    if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
-                    {
-                        retryCount = int.Parse(configuration["EventBusRetryCount"]);
-                    }
+                //     if (!string.IsNullOrEmpty(configuration["EventBusPassword"]))
+                //     {
+                //         factory.Password = configuration["EventBusPassword"];
+                //     }
 
-                    return new DefaultRabbitMQPersistentConnection(factory, logger, retryCount);
-                });
+                //     var retryCount = 5;
+                //     if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
+                //     {
+                //         retryCount = int.Parse(configuration["EventBusRetryCount"]);
+                //     }
+
+                //     return new DefaultRabbitMQPersistentConnection(factory, logger, retryCount);
+                // });
             }
 
             return services;
@@ -307,17 +313,18 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
             {
                 services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
                 {
-                    var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                    var connectionFactory = sp.GetRequiredService<ConnectionFactory>();
                     var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                     var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
                     var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
                     var retryCount = 5;
-                    if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
-                    {
-                        retryCount = int.Parse(configuration["EventBusRetryCount"]);
-                    }
-
+                    // if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
+                    // {
+                    //     retryCount = int.Parse(configuration["EventBusRetryCount"]);
+                    // }
+                    var rmqlogger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
+                    var rabbitMQPersistentConnection = new DefaultRabbitMQPersistentConnection(connectionFactory, rmqlogger, retryCount);
                     return new EventBusRabbitMQ(rabbitMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, subscriptionClientName, retryCount);
                 });
             }
