@@ -13,7 +13,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Application.Commands
     // plus only being able to update the data just once, when creating the object through its constructor.
     // References on Immutable Commands:  
     // http://cqrs.nu/Faq
-    // https://docs.spine3.org/motivation/immutability.html 
+    // https://`cs.spine3.org/motivation/immutability.html 
     // http://blog.gauffin.org/2012/06/griffin-container-introducing-command-support/
     // https://msdn.microsoft.com/en-us/library/bb383979.aspx
 

@@ -25,14 +25,14 @@
                 connection.Open();
 
                 var result = await connection.QueryAsync<dynamic>(
-                   @"select o.[Id] as ordernumber,o.OrderDate as date, o.Description as description,
-                        o.Address_City as city, o.Address_Country as country, o.Address_State as state, o.Address_Street as street, o.Address_ZipCode as zipcode,
-                        os.Name as status, 
-                        oi.ProductName as productname, oi.Units as units, oi.UnitPrice as unitprice, oi.PictureUrl as pictureurl
-                        FROM ordering.Orders o
-                        LEFT JOIN ordering.Orderitems oi ON o.Id = oi.orderid 
-                        LEFT JOIN ordering.orderstatus os on o.OrderStatusId = os.Id
-                        WHERE o.Id=@id"
+                   @"SELECT o.[Id] as ordernumber ,o.[OrderDate] as [date],os.[Name] as [status],
+                    o.Address_City as city, o.Address_Country as country, o.Address_State as state, o.Address_Street as street, o.Address_ZipCode as zipcode,
+                    oi.Discount as discount , oi.ProductName as discount  ,  oi.ProductId as productid , oi.Units as units ,  oi.UnitPrice as unitprice , oi.PictureUrl as pictureurl
+                     FROM [ordering].[Orders] o
+                     LEFT JOIN[ordering].[orderitems] oi ON  o.Id = oi.orderid 
+                     LEFT JOIN[ordering].[orderstatus] os on o.OrderStatusId = os.Id                     
+                     LEFT JOIN[ordering].[buyers] ob on o.BuyerId = ob.Id
+                      WHERE o.Id=@id"
                         , new { id }
                     );
 

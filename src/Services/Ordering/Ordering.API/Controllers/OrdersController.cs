@@ -92,7 +92,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.NewGuid());
             return Ok(orders);
         }
-        [Route("GetOrdersByUserId/{UserId:string}")]
+        [Route("GetOrdersByUserId/{UserId}")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetOrders(string UserId)

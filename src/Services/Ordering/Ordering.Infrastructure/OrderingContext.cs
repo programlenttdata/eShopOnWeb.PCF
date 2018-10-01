@@ -7,6 +7,7 @@ using Microsoft.eShopOnContainers.Services.Ordering.Domain.Seedwork;
 using Ordering.Infrastructure;
 using Ordering.Infrastructure.EntityConfigurations;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,7 +43,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new OrderItemEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CardTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrderStatusEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BuyerEntityTypeConfiguration()); 
+            modelBuilder.ApplyConfiguration(new BuyerEntityTypeConfiguration());
+            modelBuilder.Entity<Order>().OwnsOne(s => s.Address);
         }
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))

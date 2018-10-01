@@ -50,7 +50,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationInsights(Configuration)
+            services
+                //.AddApplicationInsights(Configuration)
                 .AddCustomMvc()
                 //.AddHealthChecks(Configuration)
                 .AddCustomDbContext(Configuration)
