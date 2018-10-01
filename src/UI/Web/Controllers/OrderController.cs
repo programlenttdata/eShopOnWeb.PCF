@@ -26,8 +26,6 @@ namespace Microsoft.eShopWeb.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var orders =  await _orderService.GetMyOrders(User.Identity.Name);
-          //  var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity));
-
             var viewModel = orders
                 .Select(o => new OrderViewModel()
                 {
@@ -55,8 +53,8 @@ namespace Microsoft.eShopWeb.Web.Controllers
         {
  
 
-            var customerorders =  await _orderService.GetMyOrders(User.Identity.Name);
-            var customerOrders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
+            var customerOrders =  await _orderService.GetMyOrders(User.Identity.Name);
+            //var customerOrders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
             var order = customerOrders.FirstOrDefault(o => o.Id == orderId);
             if (order == null)
             {
