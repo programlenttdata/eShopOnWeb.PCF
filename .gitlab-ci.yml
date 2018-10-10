@@ -89,7 +89,8 @@ deploy_job_web:
   dependencies:
     - build_job_web
     - test_job_web
-
+  allow_failure: true
+  
 deploy_job_catalog:
   stage: deploy
   artifacts:
@@ -107,3 +108,4 @@ deploy_job_catalog:
   dependencies:
     - build_job_catalog
     - test_job_catalog
+  allow_failure: true
