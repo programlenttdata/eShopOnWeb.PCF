@@ -8,15 +8,25 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
 
-  # catalog.api:
-  #   image: eshop/catalog.api:${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
-  #   depends_on:
-  #     - sql.data
-  #     - eurekareg
-  #     - rabbitmq    
-
   eurekareg:
     image: steeltoeoss/eurekaserver
+
+  catalog.api:
+    image: eshop/catalog.api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg
+      - rabbitmq    
+
+  web:
+    image: eshop/web:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: src/UI/Web/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg
+
