@@ -1,6 +1,9 @@
 version: '3.4'
 
 services:
+  cache:
+    ports: 
+      - "6379:6379"
   sql.data:
     environment:
       - SA_PASSWORD=Pass@word
