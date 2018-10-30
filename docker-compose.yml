@@ -1,27 +1,34 @@
-version: '3'
+version: '3.4'
 
 services:
-  eshopwebrazor:
-    image: eshopwebrazor
+  cache:
+    image: redis
+    command: redis-server --requirepass testPassword
+  sql.data:
+    image: microsoft/mssql-server-linux:2017-latest
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  eurekareg:
+    image: steeltoeoss/eurekaserver
+
+  catalog.api:
+    image: eshop/catalog.api:${TAG:-latest}
     build:
       context: .
-      dockerfile: src/WebRazorPages/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "5107:5107"
+      dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg
+      - rabbitmq    
 
-  eshopwebmvc:
-    image: eshopwebmvc
+  web:
+    image: eshop/web:${TAG:-latest}
     build:
       context: .
-      dockerfile: src/Web/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "5106:5106"
+      dockerfile: src/UI/Web/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg
 
-networks:
-  default:
-    external:
-      name: nat

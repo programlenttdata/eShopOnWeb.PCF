@@ -28,7 +28,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
                     .Wait();
 
                 })
-                .MigrateDbContext<IntegrationEventLogContext>((_,__)=> { })
+                .MigrateDbContext<IntegrationEventLogContext>((_,__)=>{})
                 .Run();
         }
 
