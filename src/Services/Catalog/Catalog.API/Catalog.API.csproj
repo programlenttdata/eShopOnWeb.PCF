@@ -46,16 +46,19 @@
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
     <PackageReference Include="Pivotal.Discovery.CLientCore" Version="2.1.0" />
     <PackageReference Include="Steeltoe.CloudFoundry.Connector.EFCore" Version="2.1.0" />
-    <PackageReference Include="SteelToe.Extensions.Configuration.CLoudFoundryCore" Version="2.1.0" />
+    <PackageReference Include="SteelToe.Extensions.Configuration.CloudFoundryCore" Version="2.1.0" />
+    <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="2.1.0" />
     <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="2.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
     <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
-  </ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="Steeltoe.CloudFoundry.ConnectorCore" Version="2.1.0" />
 
+  </ItemGroup>
+ 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\EventBus\EventBusRabbitMQ\EventBusRabbitMQ.csproj" />
     <ProjectReference Include="..\..\..\Common\EventBus\EventBusServiceBus\EventBusServiceBus.csproj" />
-    <ProjectReference Include="..\..\..\Common\EventBus\EventBus\EventBus.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks.AzureStorage\Microsoft.Extensions.HealthChecks.AzureStorage.csproj" />
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.Extensions.HealthChecks.SqlServer\Microsoft.Extensions.HealthChecks.SqlServer.csproj" />

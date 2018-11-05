@@ -24,7 +24,8 @@ using Steeltoe.Management.CloudFoundry;
 using Steeltoe.Management.Endpoint.CloudFoundry;
 using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
-
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -38,43 +39,6 @@ namespace Microsoft.eShopWeb.Web
         }
 
         public IConfiguration Configuration { get; }
-
-        // public void ConfigureDevelopmentServices(IServiceCollection services)
-        // {
-        //     // use in-memory database
-        //     ConfigureInMemoryDatabases(services);
-
-        //     // use real database
-        //     // ConfigureProductionServices(services);
-        // }
-
-        // private void ConfigureInMemoryDatabases(IServiceCollection services)
-        // {
-        //     // use in-memory database
-        //     services.AddDbContext<CatalogContext>(c =>
-        //         c.UseInMemoryDatabase("Catalog"));
-
-        //     // Add Identity DbContext
-        //     services.AddDbContext<AppIdentityDbContext>(options =>
-        //         options.UseInMemoryDatabase("Identity"));
-
-        //     //ConfigureServices(services);
-        // }
-
-        // public void ConfigureProductionServices(IServiceCollection services)
-        // {
-        //     // use real database
-        //     // Requires LocalDB which can be installed with SQL Server Express 2016
-        //     // https://www.microsoft.com/en-us/download/details.aspx?id=54284
-        //     services.AddDbContext<CatalogContext>(c =>
-        //         c.UseSqlServer(connectionString: Configuration.GetConnectionString("CatalogConnection")));
-
-        //     // Add Identity DbContext
-        //     services.AddDbContext<AppIdentityDbContext>(c =>
-        //         c.UseSqlServer(connectionString: Configuration.GetConnectionString("IdentityConnection")));
-
-        //     //ConfigureServices(services);
-        // }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -105,7 +69,6 @@ namespace Microsoft.eShopWeb.Web
             services.AddScoped<IBasketViewModelService, BasketViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<CatalogService>();
             services.Configure<CatalogSettings>(Configuration);
             services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
@@ -133,7 +96,8 @@ namespace Microsoft.eShopWeb.Web
             //services.AddHttpClient<ICatalogService, CatalogService>();
 
             services.AddMvc();
-            
+            //services.AddCustomAuthentication(Configuration);
+
             services.AddCloudFoundryActuators(Configuration);
             services.AddDiscoveryClient(Configuration);
 
@@ -147,6 +111,8 @@ namespace Microsoft.eShopWeb.Web
                 var logger = sp.GetService<ILogger<CatalogService>>();
                 return new CatalogService(httpClient, logger);
             });
+
+            services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
 
             _services = services;
         }
@@ -195,6 +161,47 @@ namespace Microsoft.eShopWeb.Web
                 sb.Append("</tbody></table>");
                 await context.Response.WriteAsync(sb.ToString());
             }));
+        }
+    }
+
+    static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddCustomAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            var useLoadTest = configuration.GetValue<bool>("UseLoadTest");
+            var identityUrl = configuration.GetValue<string>("IdentityUrl");
+            var callBackUrl = configuration.GetValue<string>("CallBackUrl");
+
+            // Add Authentication services          
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddCookie(setup=>setup.ExpireTimeSpan = TimeSpan.FromHours(2))
+            .AddOpenIdConnect(options =>
+            {
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.Authority = identityUrl.ToString();
+                options.SignedOutRedirectUri = callBackUrl.ToString();
+                options.ClientId = useLoadTest ? "mvctest" : "mvc";
+                options.ClientSecret = "secret";
+                options.ResponseType = useLoadTest ? "code id_token token" : "code id_token";
+                options.SaveTokens = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                options.RequireHttpsMetadata = false;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("orders");
+                options.Scope.Add("basket");
+                options.Scope.Add("marketing");
+                options.Scope.Add("locations");
+                options.Scope.Add("webshoppingagg");
+                options.Scope.Add("orders.signalrhub");       
+            });
+
+            return services;
         }
     }
 }

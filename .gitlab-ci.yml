@@ -1,0 +1,111 @@
+image: microsoft/dotnet:latest
+ 
+stages:
+  - build
+  - test
+  - deploy
+ 
+build_job_web:
+  stage: build
+  artifacts:
+    paths:
+      - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/UI/; then
+        pwd
+        cd src/UI/Web
+        dotnet restore
+        dotnet build
+        dotnet publish
+      else
+        echo "Skipping Web build coz no change was detected in the Web project"
+        exit 1
+      fi;
+  allow_failure: true
+
+build_job_catalog:
+  stage: build
+  artifacts:
+    paths:
+      - 'src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
+        pwd
+        cd src/Services/Catalog/Catalog.API
+        dotnet restore
+        dotnet build
+        dotnet publish
+      else
+        echo "Skipping Catalog.API build coz no change was detected in the Catalog.API project"
+        exit 1
+      fi;
+  allow_failure: true
+
+test_job_web:
+  stage: test
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/UI/; then
+        dotnet test tests/UnitTests
+        dotnet test tests/IntegrationTests
+      else
+        echo "Skipping Web tests coz no change was detected in the Web test project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_web
+  allow_failure: true
+
+test_job_catalog:
+  stage: test
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
+        dotnet test src/Services/Catalog/Catalog.UnitTests/UnitTests
+      else
+        echo "Skipping Catalog.API tests coz no change was detected in the Catalog.API test project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_catalog
+  allow_failure: true
+
+deploy_job_web:
+  stage: deploy
+  artifacts:
+    paths:
+      - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/UI/; then
+        cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -o NTTD-PCF-RG-org -s eshop
+        cf push -f manifest-Web.yml
+      else
+        echo "Skipping Web deploy coz no change was detected in the Web project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_web
+    - test_job_web
+  allow_failure: true
+  
+deploy_job_catalog:
+  stage: deploy
+  artifacts:
+    paths:
+      - 'src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Catalog/; then
+        cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -o NTTD-PCF-RG-org -s eshop
+        cf push -f manifest-Catalog.yml
+      else
+        echo "Skipping Catalog.API deploy coz no change was detected in the Catalog.API project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_catalog
+    - test_job_catalog
+  allow_failure: true
