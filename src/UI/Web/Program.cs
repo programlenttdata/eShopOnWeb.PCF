@@ -44,6 +44,7 @@ namespace Microsoft.eShopWeb.Web
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)      
                 .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
+                .ConfigureAppConfiguration(c => c.AddCloudFoundry())
                 .UseCloudFoundryHosting()   
                 .AddCloudFoundry()    
                 .UseStartup<Startup>();

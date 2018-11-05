@@ -14,6 +14,7 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
 
         public Order GetByIdWithItems(int id)
         {
+
             return _dbContext.Orders
                 .Include(o => o.OrderItems)
                 .Include($"{nameof(Order.OrderItems)}.{nameof(OrderItem.ItemOrdered)}")

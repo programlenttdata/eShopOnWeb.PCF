@@ -5,6 +5,7 @@ using Microsoft.eShopWeb.ApplicationCore.Entities;
 using System.Collections.Generic;
 using Ardalis.GuardClauses;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
+using NTTData.eShopMonoToMicro.Entities.Orders;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services
 {
@@ -23,7 +24,7 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
             _itemRepository = itemRepository;
         }
 
-        public async Task CreateOrderAsync(int basketId, Address shippingAddress)
+        public async Task CreateOrderAsync(int basketId, Address shippingAddress, string UserId)
         {
             var basket = await _basketRepository.GetByIdAsync(basketId);
             Guard.Against.NullBasket(basketId, basket);
@@ -35,7 +36,9 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
                 var orderItem = new OrderItem(itemOrdered, item.UnitPrice, item.Quantity);
                 items.Add(orderItem);
             }
-            var order = new Order(basket.BuyerId, shippingAddress, items);
+            var order = new Order(basket.BuyerId, shippingAddress, items); // old mono order
+            var microOrder = new NTTData.eShopMonoToMicro.Entities.Orders.CreateOrderCommand(UserId, basket.BuyerId, shippingAddress,  basket.Items); // new hotness
+            //var Ordering = new Ordering();
 
             await _orderRepository.AddAsync(order);
         }
