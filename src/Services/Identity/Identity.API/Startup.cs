@@ -82,23 +82,23 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API
             //var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             // Adds IdentityServer
-            services.AddIdentityServer(x =>
-            {
-                x.IssuerUri = "null";
-                x.Authentication.CookieLifetime = TimeSpan.FromHours(2);
-            })
-            .AddSigningCredential(Certificate.Get())
-            .AddAspNetIdentity<ApplicationUser>()
-            .AddConfigurationStore(options =>
-                {
-                    options.ConfigureDbContext = builder => builder.UseSqlServer(Configuration);
-                })
-            .AddOperationalStore(options =>
-                {
-                    options.ConfigureDbContext = builder => builder.UseSqlServer(Configuration);
-                })
-            .AddSwagger()
-            .Services.AddTransient<IProfileService, ProfileService>();
+            //services.AddIdentityServer(x =>
+            //{
+            //    x.IssuerUri = "null";
+            //    x.Authentication.CookieLifetime = TimeSpan.FromHours(2);
+            //})
+            //.AddSigningCredential(Certificate.Get())
+            //.AddAspNetIdentity<ApplicationUser>()
+            //.AddConfigurationStore(options =>
+            //    {
+            //        options.ConfigureDbContext = builder => builder.UseSqlServer(Configuration);
+            //    })
+            //.AddOperationalStore(options =>
+            //    {
+            //        options.ConfigureDbContext = builder => builder.UseSqlServer(Configuration);
+            //    })
+            //.AddSwagger()
+            //.Services.AddTransient<IProfileService, ProfileService>();
 
             services.AddCloudFoundryActuators(Configuration);
 

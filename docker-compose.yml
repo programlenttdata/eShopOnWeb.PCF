@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  cache:
+  redis:
     image: redis
     command: redis-server --requirepass testPassword
   sql.data:
@@ -13,15 +13,16 @@ services:
   eurekareg:
     image: steeltoeoss/eurekaserver
 
-  catalog.api:
-    image: eshop/catalog.api:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
-    depends_on:
-      - sql.data
-      - eurekareg
-      - rabbitmq    
+  #catalog.api:
+  #  image: eshop/catalog.api:${TAG:-latest}
+  #  build:
+  #    context: .
+  #    dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
+  #  depends_on:
+  #    - sql.data
+  #    - eurekareg
+  #    - rabbitmq  
+  #    - cache
 
   web:
     image: eshop/web:${TAG:-latest}
