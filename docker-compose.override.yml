@@ -49,6 +49,20 @@ services:
       - "5101:80"   # Important: In a production environment your should remove the external port (5101) kept here for microservice debugging purposes. 
                     # The API Gateway redirects and access through the internal port (80).
 
+  basket.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - rabbitmq__client__uri=amqp://guest:guest@rabbitmq:5672/
+      - eureka__client__serviceUrl=http://eurekareg:8761/eureka
+      - UseCustomizationData=True
+      - AzureServiceBusEnabled=False
+      - AzureStorageEnabled=False
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+    ports:
+      - "5102:80"   # Important: In a production environment your should remove the external port (5102) kept here for microservice debugging purposes. 
+                    # The API Gateway redirects and access through the internal port (80).
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
