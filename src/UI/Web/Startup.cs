@@ -26,6 +26,8 @@ using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -42,9 +44,9 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppIdentityDbContext>()
-                .AddDefaultTokenProviders();
+            // services.AddIdentity<ApplicationUser, IdentityRole>()
+            //     .AddEntityFrameworkStores<AppIdentityDbContext>()
+            //     .AddDefaultTokenProviders();
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -59,7 +61,7 @@ namespace Microsoft.eShopWeb.Web
             });
 
             services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
-            services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
+            //services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
 
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
@@ -96,7 +98,7 @@ namespace Microsoft.eShopWeb.Web
             //services.AddHttpClient<ICatalogService, CatalogService>();
 
             services.AddMvc();
-            //services.AddCustomAuthentication(Configuration);
+            services.AddCustomAuthentication(Configuration);
 
             services.AddCloudFoundryActuators(Configuration);
             services.AddDiscoveryClient(Configuration);
@@ -134,6 +136,14 @@ namespace Microsoft.eShopWeb.Web
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                RequireHeaderSymmetry = false
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
             app.UseAuthentication();
 
             app.UseMvc();
@@ -169,9 +179,10 @@ namespace Microsoft.eShopWeb.Web
         public static IServiceCollection AddCustomAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             var useLoadTest = configuration.GetValue<bool>("UseLoadTest");
-            var identityUrl = configuration.GetValue<string>("IdentityUrl");
-            var callBackUrl = configuration.GetValue<string>("CallBackUrl");
+            var identityUrl = configuration["IdentityUrl"]; // configuration.GetValue<string>("IdentityUrl");
+            var callBackUrl = configuration["CallBackUrl"]; // configuration.GetValue<string>("CallBackUrl");
 
+            Console.WriteLine($"IdUrl: {identityUrl} ... CBUrl: {callBackUrl}");
             // Add Authentication services          
 
             services.AddAuthentication(options =>
@@ -190,7 +201,7 @@ namespace Microsoft.eShopWeb.Web
                 options.ResponseType = useLoadTest ? "code id_token token" : "code id_token";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("orders");
