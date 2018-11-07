@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.eShopOnContainers.Services.Catalog.API.Infrastructure;
-using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Events;
+using Microsoft.eShopOnContainers.Common.EventBus.Events;
 
 namespace Catalog.API.Infrastructure.Migrations
 {
@@ -21,7 +21,7 @@ namespace Catalog.API.Infrastructure.Migrations
                 .HasAnnotation("SqlServer:Sequence:.catalog_type_hilo", "'catalog_type_hilo', '', '1', '10', '', '', 'Int64', 'False'")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Events.IntegrationEventLogEntry", b =>
+            modelBuilder.Entity("Microsoft.eShopOnContainers.Common.EventBus.Events.IntegrationEventLogEntry", b =>
                 {
                     b.Property<Guid>("EventId")
                         .ValueGeneratedOnAdd();

@@ -1,4 +1,4 @@
-﻿using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
+﻿using Microsoft.eShopOnContainers.Common.EventBus.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Text;

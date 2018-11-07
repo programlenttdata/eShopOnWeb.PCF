@@ -1,4 +1,4 @@
-﻿using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Events;
+﻿using Microsoft.eShopOnContainers.Common.EventBus.Events;
 using Microsoft.eShopOnContainers.Services.Basket.API.Model;
 using System;
 

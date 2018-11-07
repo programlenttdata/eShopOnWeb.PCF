@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.eShopOnContainers.BuildingBlocks.CommandBus
+namespace Microsoft.eShopOnContainers.Common.CommandBus
 {
     public interface IIntegrationCommandHandler
     {

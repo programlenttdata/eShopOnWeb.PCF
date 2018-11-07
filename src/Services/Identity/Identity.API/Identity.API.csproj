@@ -41,9 +41,9 @@
      <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.7.385" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <EmbeddedResource Include="Certificate\idsrv3test.pfx" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\HealthChecks\src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj" />
