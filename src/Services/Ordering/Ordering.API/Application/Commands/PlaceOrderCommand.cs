@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Collections;
 using Ordering.API.Application.Models;
 using System.Linq;
+using Ordering.API.Application.Commands;
 
 namespace Microsoft.eShopOnContainers.Services.Ordering.API.Application.Commands
 {
@@ -18,14 +19,10 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Application.Commands
     // https://msdn.microsoft.com/en-us/library/bb383979.aspx
 
     [DataContract]
-    public class CreateOrderCommand : BaseOrderCommand<bool>
+    public class PlaceOrderCommand : BaseOrderCommand <OrderResponse>
     {
-        public CreateOrderCommand()
-        {
-            _orderItems = new List<OrderItemDTO>();
-        }
 
-        public CreateOrderCommand(List<BasketItem> basketItems, string userId, string userName, string city,
+        public PlaceOrderCommand(List<BasketItem> basketItems, string userId, string userName, string city,
             string street, string state, string country, string zipcode,
             string cardNumber, string cardHolderName, DateTime cardExpiration,
             string cardSecurityNumber, int cardTypeId) : this()
@@ -46,5 +43,9 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Application.Commands
             CardExpiration = cardExpiration;
         }
 
+        public PlaceOrderCommand()
+        {
+            _orderItems = new List<OrderItemDTO>();
+        }
     }
 }

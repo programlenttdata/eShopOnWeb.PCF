@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  sql.data:
+    image: microsoft/mssql-server-linux:2017-latest
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+#  sql.data:
+#  image: mysql:5.7
+
+#  ordering.api:
+#    image: eshop/ordering.api:${TAG:-latest}
+#    build:
+#      context: .
+#      dockerfile: Services/Ordering/Ordering.API/Dockerfile   
+#     depends_on:
+#      - sql.data
+#      - rabbitmq
+
+  ordering.backgroundtasks:
+    image: eshop/ordering.backgroundtasks:${TAG:-latest}
+    build:
+      context: .
+      dockerfile:  Services/Ordering/Ordering.BackgroundTasks/Dockerfile    
+    depends_on:
+      - sql.data
+      - rabbitmq
+
+#  ordering.signalrhub:
+#    image: eshop/ordering.signalrhub:${TAG:-latest}
+#    build:
+#      context: .
+#     dockerfile:  Services/Ordering/Ordering.SignalrHub/Dockerfile

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/orders")]
     [Authorize]
     [ApiController]
     public class OrdersController : Controller
@@ -92,7 +92,6 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.NewGuid());
             return Ok(orders);
         }
-        [Route("GetOrdersByUserId/{UserId}")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetOrders(string UserId)
@@ -120,11 +119,11 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var draft  = await _mediator.Send(createOrderDraftCommand);
             return Ok(draft);
         }
-        [Route("PlaceOrder")]
+
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand createOrderCommand)
+        public async Task<IActionResult> CreateOrder([FromBody] PlaceOrderCommand placeOrderCommand)
         {
-            var order= await _mediator.Send(createOrderCommand);
+            var order= await _mediator.Send(placeOrderCommand);
             return Ok(order);
         }
     }

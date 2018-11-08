@@ -8,6 +8,7 @@ using Ordering.Infrastructure;
 using Ordering.Infrastructure.EntityConfigurations;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,6 +48,23 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.Infrastructure
             modelBuilder.Entity<Order>().OwnsOne(s => s.Address);
         }
 
+        public async Task<int> SaveChangesAsync()
+        {
+            foreach (var entry in ChangeTracker.Entries().Where(e => e.Entity is Order &&
+                                                                     (e.State == EntityState.Added || e.State == EntityState.Modified)))
+            {
+                if (entry.Entity is Order)
+                {
+                    if (entry.Reference("Address").CurrentValue == null)
+                    {
+                        entry.Reference("Address").CurrentValue = Address.Empty();
+                    }
+                    //entry.Reference ("TestAddress").TargetEntry.State = entry.State;
+                    // entry.Reference ("BillingAddress").TargetEntry.State = entry.State;
+                }
+            }
+            return  base.SaveChanges();
+        }
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             // Dispatch Domain Events collection. 
