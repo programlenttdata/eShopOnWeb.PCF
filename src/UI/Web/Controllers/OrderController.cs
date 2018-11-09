@@ -8,6 +8,7 @@ using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using System.Linq;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
 using Microsoft.eShopWeb.Web.Services;
+using webDependencies;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {

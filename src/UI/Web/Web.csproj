@@ -4,6 +4,10 @@
 		<TargetFramework>netcoreapp2.1</TargetFramework>
 		<RootNamespace>Microsoft.eShopWeb.Web</RootNamespace>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Controllers\OrderController.cs" />
+	</ItemGroup>
         
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="1.50.5" />
@@ -19,6 +23,7 @@
 		<Folder Include="wwwroot\fonts\" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\Common\webDependencies\webDependencies.csproj" />
 		<ProjectReference Include="..\ApplicationCore\ApplicationCore.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
