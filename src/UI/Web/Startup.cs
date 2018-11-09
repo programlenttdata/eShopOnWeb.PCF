@@ -93,6 +93,9 @@ namespace Microsoft.eShopWeb.Web
 
             //add http client services
 
+            services.AddHttpClientServices(Configuration);
+
+
             //services.AddHttpClient<ICatalogService, CatalogService>();
 
             services.AddMvc();
