@@ -1,33 +1,31 @@
-﻿using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
+using Microsoft.eShopWeb.Comm;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.eShopWeb.Infrastructure.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Text;
-using Microsoft.eShopWeb.Comm;
-using Pivotal.Discovery.Client;
-using Steeltoe.Common.Discovery;
-using System.Net.Http;
 using Microsoft.Extensions.Logging;
+using Pivotal.Discovery.Client;
+using Polly;
+using Polly.Extensions.Http;
+using Steeltoe.Common.Discovery;
 using Steeltoe.Management.CloudFoundry;
-using Steeltoe.Management.Endpoint.CloudFoundry;
-using Steeltoe.Common.HealthChecks;
-using Steeltoe.Management.Endpoint.Info;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpOverrides;
+using System;
+using System.Net.Http;
+using System.Text;
+using BasketService = Microsoft.eShopWeb.Web.Services.BasketService;
+using IBasketService = Microsoft.eShopWeb.Web.Interfaces.IBasketService;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -68,7 +66,7 @@ namespace Microsoft.eShopWeb.Web
 
             services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
-            services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+           // services.AddScoped<IBasketViewModelService, BasketViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<CatalogService>();
@@ -213,6 +211,66 @@ namespace Microsoft.eShopWeb.Web
             });
 
             return services;
+        }
+
+        public static IServiceCollection AddHttpClientServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            //register delegating handlers
+            services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
+            services.AddTransient<HttpClientRequestIdDelegatingHandler>();
+
+            //set 5 min as the lifetime for each HttpMessageHandler int the pool
+            services.AddHttpClient("extendedhandlerlifetime").SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            //add http client services
+            services.AddHttpClient<IBasketService, BasketService>()
+                   .SetHandlerLifetime(TimeSpan.FromMinutes(5))  //Sample. Default lifetime is 2 minutes
+                   .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+                   .AddPolicyHandler(GetRetryPolicy())
+                   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            services.AddHttpClient<ICatalogService, CatalogService>()
+                   .AddPolicyHandler(GetRetryPolicy())
+                   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            ///TODO
+            //services.AddHttpClient<IOrderingService, OrderingService>()
+            //     .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //     .AddHttpMessageHandler<HttpClientRequestIdDelegatingHandler>()
+            //     .AddPolicyHandler(GetRetryPolicy())
+            //     .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //services.AddHttpClient<ICampaignService, CampaignService>()
+            //    .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //    .AddPolicyHandler(GetRetryPolicy())
+            //    .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //services.AddHttpClient<ILocationService, LocationService>()
+            //   .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //   .AddPolicyHandler(GetRetryPolicy())
+            //   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //add custom application services
+            services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+
+            return services;
+        }
+
+        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        }
+        static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
         }
     }
 }

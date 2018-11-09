@@ -4,6 +4,7 @@ namespace Microsoft.eShopWeb.Web
     {
         public Connectionstrings ConnectionStrings { get; set; }
         public string CatalogBaseUrl { get; set; }
+        public string PurchaseUrl { get; set; }
         public Logging Logging { get; set; }
     }
 

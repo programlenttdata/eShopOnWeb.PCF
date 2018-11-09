@@ -1,111 +1,92 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.eShopWeb.Infrastructure.Identity;
-using System;
+using Polly.CircuitBreaker;
 using System.Collections.Generic;
-using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.eShopWeb.Web.Interfaces;
+using System.Threading.Tasks;
+using IBasketService = Microsoft.eShopWeb.Web.Interfaces.IBasketService;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
-    [Route("[controller]/[action]")]
-    public class BasketController : Controller
+    [Authorize]
+    public class CartController : Controller
     {
-        private readonly IBasketService _basketService;
-        private readonly IUriComposer _uriComposer;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IAppLogger<BasketController> _logger;
-        private readonly IOrderService _orderService;
-        private readonly IBasketViewModelService _basketViewModelService;
+        private readonly IBasketService _basketSvc;
+        private readonly ICatalogService _catalogSvc;
+        private readonly IIdentityParser<ApplicationUser> _appUserParser;
 
-        public BasketController(IBasketService basketService,
-            IBasketViewModelService basketViewModelService,
-            IOrderService orderService,
-            IUriComposer uriComposer,
-            SignInManager<ApplicationUser> signInManager,
-            IAppLogger<BasketController> logger)
+        public CartController(IBasketService basketSvc, ICatalogService catalogSvc, IIdentityParser<ApplicationUser> appUserParser)
         {
-            _basketService = basketService;
-            _uriComposer = uriComposer;
-            _signInManager = signInManager;
-            _logger = logger;
-            _orderService = orderService;
-            _basketViewModelService = basketViewModelService;
+            _basketSvc = basketSvc;
+            _catalogSvc = catalogSvc;
+            _appUserParser = appUserParser;
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var basketModel = await GetBasketViewModelAsync();
-
-            return View(basketModel);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index(Dictionary<string, int> items)
-        {
-            var basketViewModel = await GetBasketViewModelAsync();
-            await _basketService.SetQuantities(basketViewModel.Id, items);
-
-            return View(await GetBasketViewModelAsync());
-        }
-
-
-        // POST: /Basket/AddToBasket
-        [HttpPost]
-        public async Task<IActionResult> AddToBasket(CatalogItemViewModel productDetails)
-        {
-            if (productDetails?.Id == null)
+            try
             {
+                var user = _appUserParser.Parse(HttpContext.User);
+                var vm = await _basketSvc.GetBasket(user);
+
+                return View(vm);
+            }
+            catch (BrokenCircuitException)
+            {
+                // Catch error when Basket.api is in circuit-opened mode                 
+                HandleBrokenCircuitException();
+            }
+
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Index(Dictionary<string, int> quantities, string action)
+        {
+            try
+            {
+                var user = _appUserParser.Parse(HttpContext.User);
+                var basket = await _basketSvc.SetQuantities(user, quantities);
+                if (action == "[ Checkout ]")
+                {
+                    return RedirectToAction("Create", "Order");
+                }
+            }
+            catch (BrokenCircuitException)
+            {
+                // Catch error when Basket.api is in circuit-opened mode                 
+                HandleBrokenCircuitException();
+            }
+
+            return View();
+        }
+
+        public async Task<IActionResult> AddToCart(CatalogItem productDetails)
+        {
+            try
+            {
+                if (productDetails?.Id != null)
+                {
+                    var user = _appUserParser.Parse(HttpContext.User);
+                    await _basketSvc.AddItemToBasket(user, productDetails.Id);
+                }
                 return RedirectToAction("Index", "Catalog");
             }
-            var basketViewModel = await GetBasketViewModelAsync();
-
-            await _basketService.AddItemToBasket(basketViewModel.Id, productDetails.Id, productDetails.Price, 1);
-
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> Checkout(Dictionary<string, int> items)
-        {
-            var basketViewModel = await GetBasketViewModelAsync();
-            await _basketService.SetQuantities(basketViewModel.Id, items);
-
-            await _orderService.CreateOrderAsync(basketViewModel.Id, new Address("123 Main St.", "Kent", "OH", "United States", "44240"));
-
-            await _basketService.DeleteBasketAsync(basketViewModel.Id);
-
-            return View("Checkout");
-        }
-
-        private async Task<BasketViewModel> GetBasketViewModelAsync()
-        {
-            if (_signInManager.IsSignedIn(HttpContext.User))
+            catch (BrokenCircuitException)
             {
-                return await _basketViewModelService.GetOrCreateBasketForUser(User.Identity.Name);
+                // Catch error when Basket.api is in circuit-opened mode                 
+                HandleBrokenCircuitException();
             }
-            string anonymousId = GetOrSetBasketCookie();
-            return await _basketViewModelService.GetOrCreateBasketForUser(anonymousId);
+
+            return RedirectToAction("Index", "Catalog", new { errorMsg = ViewBag.BasketInoperativeMsg });
         }
- 
-        private string GetOrSetBasketCookie()
+
+        private void HandleBrokenCircuitException()
         {
-            if (Request.Cookies.ContainsKey(Constants.BASKET_COOKIENAME))
-            {
-                return Request.Cookies[Constants.BASKET_COOKIENAME];
-            }
-            string anonymousId = Guid.NewGuid().ToString();
-            var cookieOptions = new CookieOptions();
-            cookieOptions.Expires = DateTime.Today.AddYears(10);
-            Response.Cookies.Append(Constants.BASKET_COOKIENAME, anonymousId, cookieOptions);
-            return anonymousId;
+            ViewBag.BasketInoperativeMsg = "Basket Service is inoperative, please try later on. (Business Msg Due to Circuit-Breaker)";
         }
     }
 }

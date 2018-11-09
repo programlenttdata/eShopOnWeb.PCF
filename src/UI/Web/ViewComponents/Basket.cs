@@ -7,12 +7,14 @@ using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.eShopWeb.Web.Services;
+using ApplicationUser = Microsoft.eShopWeb.Web.ViewModels.ApplicationUser;
 
 namespace Microsoft.eShopWeb.Web.ViewComponents
 {
     public class Basket : ViewComponent
     {
-        private readonly IBasketViewModelService _basketService;
+        private readonly BasketViewModelService _basketService;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
         public Basket(IBasketViewModelService basketService,

@@ -1,10 +1,19 @@
-﻿using Microsoft.eShopWeb.Web.ViewModels;
+﻿
+using Microsoft.eShopWeb.Web.Models;
+using Microsoft.eShopWeb.Web.ViewModels;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.Web.Interfaces
 {
-    public interface IBasketViewModelService
+    public interface IBasketService
     {
-        Task<BasketViewModel> GetOrCreateBasketForUser(string userName);
+        Task<Basket> GetBasket(ApplicationUser user);
+        Task AddItemToBasket(ApplicationUser user, int productId);
+        Task<Basket> UpdateBasket(Basket basket);
+        Task Checkout(BasketDTO basket);
+        Task<Basket> SetQuantities(ApplicationUser user, Dictionary<string, int> quantities);
+        Task<Order> GetOrderDraft(string basketId);
     }
 }
+
