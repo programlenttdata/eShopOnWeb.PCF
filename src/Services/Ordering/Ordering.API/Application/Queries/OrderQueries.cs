@@ -27,7 +27,7 @@
                 var result = await connection.QueryAsync<dynamic>(
                    @"SELECT o.[Id] as ordernumber ,o.[OrderDate] as [date],os.[Name] as [status],
                     o.Address_City as city, o.Address_Country as country, o.Address_State as state, o.Address_Street as street, o.Address_ZipCode as zipcode,
-                    oi.Discount as discount , oi.ProductName as discount  ,  oi.ProductId as productid , oi.Units as units ,  oi.UnitPrice as unitprice , oi.PictureUrl as pictureurl
+                    oi.Discount as discount , oi.ProductName as productname  ,  oi.ProductId as productid , oi.Units as units ,  oi.UnitPrice as unitprice , oi.PictureUrl as pictureurl
                      FROM [ordering].[Orders] o
                      LEFT JOIN[ordering].[orderitems] oi ON  o.Id = oi.orderid 
                      LEFT JOIN[ordering].[orderstatus] os on o.OrderStatusId = os.Id                     
