@@ -4,6 +4,7 @@ services:
   cache:
     image: redis
     command: redis-server --requirepass testPassword
+
   sql.data:
     image: microsoft/mssql-server-linux:2017-latest
 
@@ -40,4 +41,3 @@ services:
     depends_on:
       - sql.data
       - eurekareg
-

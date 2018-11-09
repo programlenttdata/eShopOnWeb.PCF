@@ -7,9 +7,11 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - "5433:1433"   
+
   cache:
     ports: 
       - "6379:6379"
+
   rabbitmq:
     ports:
       - "15672:15672" 
@@ -52,8 +54,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:80
       - ConnectionStrings__CatalogConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.CatalogDb;User Id=sa;Password=Pass@word
-      - ConnectionStrings__IdentityConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.Identity;User Id=sa;Password=Pass@word
-      - CatalogBaseUrl=http://catalog.api/
+      # - ConnectionStrings__IdentityConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.Identity;User Id=sa;Password=Pass@word
+      - CatalogBaseUrl=http://localhost:5101/
+      - IdentityUrl=http://localhost:5105/
+      - CallbackUrl=http://localhost:5100/
       - eureka__client__serviceUrl=http://eurekareg:8761/eureka
     ports:
       - "5100:80"

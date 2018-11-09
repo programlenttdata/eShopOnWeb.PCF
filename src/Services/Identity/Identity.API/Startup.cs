@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
- using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.eShopOnContainers.Services.Identity.API.Certificates;
 using Microsoft.eShopOnContainers.Services.Identity.API.Data;
@@ -24,6 +24,8 @@ using Steeltoe.Management.Endpoint.CloudFoundry;
 using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
 using Pivotal.Discovery.Client;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Microsoft.eShopOnContainers.Services.Identity.API
 {
@@ -149,11 +151,20 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API
             // Make work identity server redirections in Edge and lastest versions of browers. WARN: Not valid in a production environment.
             app.Use(async (context, next) =>
             {
-                context.Response.Headers.Add("Content-Security-Policy", "script-src 'unsafe-inline'");
+                context.Response.Headers.Add("Content-Security-Policy", "script-src 'unsafe-inline'");            
                 await next();
             });
 
-            app.UseForwardedHeaders();
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                RequireHeaderSymmetry = false
+            };
+
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+
+            app.UseForwardedHeaders(forwardOptions);
             // Adds IdentityServer
             app.UseIdentityServer();
 
