@@ -10,7 +10,7 @@ using Catalog.API.Extensions;
 
 namespace Catalog.API.Model
 {
-    public class CachedCatalogService : CatalogService, ICachedCatalogService
+    public class CachedCatalogService : ICachedCatalogService
     {
         private readonly IDistributedCache _cache;
 
@@ -19,46 +19,47 @@ namespace Catalog.API.Model
         public static readonly string TOTAL_BRANDS_KEY = "TOTAL_BRAND_TYPES";
 
         private readonly ILogger<CachedCatalogService> _logger;
+        private readonly CatalogService _catalogService;
 
-        public CachedCatalogService(IDistributedCache cache, CatalogItemRepository itemRepository, IReadOnlyRepository<CatalogType> typeRepository,
-            IReadOnlyRepository<CatalogBrand> brandRepository, ILogger<CachedCatalogService> logger) : base(itemRepository, typeRepository, brandRepository)
+        public CachedCatalogService(IDistributedCache cache, CatalogService catalogService, ILogger<CachedCatalogService> logger)
         {
             _cache = cache;
+            _catalogService = catalogService;
             _logger = logger;
         }
 
         private async Task ResetAsync()
         {
-            await _cache.TryResetAsync(TOTAL_KEY, await (this as CatalogService).ListAllAsync());
+            await _cache.TryResetAsync(TOTAL_KEY, await _catalogService.ListAllAsync());
         }
 
-        public new async Task<CatalogItem> AddAsync(CatalogItem entity, bool saveChanges = true)
+        public async Task<CatalogItem> AddAsync(CatalogItem entity, bool saveChanges = true)
         {
-            var item = await (this as CatalogService).AddAsync(entity, saveChanges);
+            var item = await _catalogService.AddAsync(entity, saveChanges);
             await ResetAsync();
             return item;
         }
 
-        public new async Task<CatalogItem> UpdateAsync(CatalogItem entity, bool saveChanges)
+        public async Task<CatalogItem> UpdateAsync(CatalogItem entity, bool saveChanges)
         {
-            var item = await (this as CatalogService).UpdateAsync(entity, saveChanges);
+            var item = await _catalogService.UpdateAsync(entity, saveChanges);
             await ResetAsync();
             return item;
         }
 
-        public new async Task<bool?> DeleteAsync(int id, bool saveChanges = true)
+        public async Task<bool?> DeleteAsync(int id, bool saveChanges = true)
         {
-            var result = await (this as CatalogService).DeleteAsync(id, saveChanges);
+            var result = await _catalogService.DeleteAsync(id, saveChanges);
             await ResetAsync();
             return result;
         }
 
-        public new async Task<IEnumerable<CatalogItem>> ListAllAsync()
+        public async Task<IEnumerable<CatalogItem>> ListAllAsync()
         {
             var catalogItems = await _cache.TryGetAsync<List<CatalogItem>>(TOTAL_KEY);
             if (catalogItems == null)
             {
-                catalogItems = (await (this as CatalogService).ListAllAsync()).ToList();
+                catalogItems = (await _catalogService.ListAllAsync()).ToList();
                 await _cache.TrySetAsync(TOTAL_KEY, catalogItems);
             }
             return catalogItems;
@@ -72,7 +73,7 @@ namespace Catalog.API.Model
             var item = await _cache.TryGetAsync<CatalogItem>(filter.Key);
             if (item == null)
             {
-                item = (await (this as CatalogService).GetSingleBySpecAsync(spec));
+                item = (await _catalogService.GetSingleBySpecAsync(spec));
                 await _cache.TrySetAsync(filter.Key, item);
             }
             return item;
@@ -86,7 +87,7 @@ namespace Catalog.API.Model
             var items = await _cache.TryGetAsync<List<CatalogItem>>(filter.Key);
             if (items == null)
             {
-                items = (await (this as CatalogService).ListAsync(spec)).ToList();
+                items = (await _catalogService.ListAsync(spec)).ToList();
 
                 if (filter.PageSize.HasValue)
                 {
@@ -105,7 +106,7 @@ namespace Catalog.API.Model
             var items = await _cache.TryGetAsync<List<CatalogItem>>(filter.Key);
             if (items == null)
             {
-                items = (await (this as CatalogService).ListAsync(ids, spec)).ToList();
+                items = (await _catalogService.ListAsync(ids, spec)).ToList();
 
                 if (filter.PageSize.HasValue)
                 {
@@ -116,28 +117,38 @@ namespace Catalog.API.Model
             return items;
         }
 
-        public new async Task<IEnumerable<CatalogType>> ListAllCatalogTypeAsync()
+        public async Task<IEnumerable<CatalogType>> ListAllCatalogTypeAsync()
         {
             var catalogTypes = await _cache.TryGetAsync<List<CatalogType>>(TOTAL_TYPES_KEY);
             if (catalogTypes == null)
             {
-                catalogTypes = (await (this as CatalogService).ListAllCatalogTypeAsync()).ToList();
+                catalogTypes = (await _catalogService.ListAllCatalogTypeAsync()).ToList();
                 await _cache.TrySetAsync(TOTAL_TYPES_KEY, catalogTypes);
             }
 
             return catalogTypes;
         }
 
-        public new async Task<IEnumerable<CatalogBrand>> ListAllCatalogBrandAsync()
+        public async Task<IEnumerable<CatalogBrand>> ListAllCatalogBrandAsync()
         {
             var catalogBrands = await _cache.TryGetAsync<List<CatalogBrand>>(TOTAL_BRANDS_KEY);
             if (catalogBrands == null)
             {
-                catalogBrands = (await (this as CatalogService).ListAllCatalogBrandAsync()).ToList();
+                catalogBrands = (await _catalogService.ListAllCatalogBrandAsync()).ToList();
                 await _cache.TrySetAsync(TOTAL_BRANDS_KEY, catalogBrands);
             }
 
             return catalogBrands;
+        }
+
+        public async Task<CatalogItem> GetSingleBySpecAsync(ISpecification<CatalogItem> spec)
+        {
+            return (await _catalogService.GetSingleBySpecAsync(spec));
+        }
+
+        public async Task<IEnumerable<CatalogItem>> ListAsync(ISpecification<CatalogItem> spec)
+        {
+            return (await _catalogService.ListAsync(spec)).ToList();
         }
     }
 }

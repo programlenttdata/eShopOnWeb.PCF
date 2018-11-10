@@ -4,26 +4,26 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Microsoft.eShopOnContainers.Services.Catalog.API.Model;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Catalog.API.Model
 {
     public class CatalogService : ICatalogService
     {
         private readonly CatalogItemRepository _itemRepository;
-        private readonly IReadOnlyRepository<CatalogType> _typeRepository;
-        private readonly IReadOnlyRepository<CatalogBrand> _brandRepository;
-   
+        private readonly IRepository<CatalogType> _typeRepository;
+        private readonly IRepository<CatalogBrand> _brandRepository;
 
-        public CatalogService(CatalogItemRepository itemRepository, IReadOnlyRepository<CatalogType> typeRepository, 
-            IReadOnlyRepository<CatalogBrand> brandRepository)
+        public CatalogService(IDistributedCache cache, ICatalogItemRepository itemRepository, IRepository<CatalogType> typeRepository,
+           IRepository<CatalogBrand> brandRepository)
         {
-            _itemRepository = itemRepository;
+            _itemRepository = itemRepository as CatalogItemRepository;
             _typeRepository = typeRepository;
             _brandRepository = brandRepository;
         }
 
         public async Task<CatalogItem> AddAsync(CatalogItem entity, bool saveChanges = true)
-        {
+        {            
             return await _itemRepository.AddAsync(entity, saveChanges);
         }
 
@@ -40,7 +40,6 @@ namespace Catalog.API.Model
             {
                 return null;
             }
-
             return await _itemRepository.DeleteAsync(id, saveChanges);
         }
 
@@ -64,15 +63,9 @@ namespace Catalog.API.Model
             if (!string.IsNullOrEmpty(ids))
             {
                 var numIds = ids.Split(',').Select(id => (Ok: int.TryParse(id, out int x), Value: x));
-
-                //var value = await _cache.TryGetAsync<List<CatalogItem>>(ids);
                 var idsToSelect = numIds.Select(id => id.Value);
 
-                //if (value == null)
-                //{
                 return (await ListAsync(spec)).Where(ci => idsToSelect.Contains(ci.Id)).ToList();
-                    //await _cache.TrySetAsync(ids, value);
-                //}
             }
 
             return (await ListAsync(spec));

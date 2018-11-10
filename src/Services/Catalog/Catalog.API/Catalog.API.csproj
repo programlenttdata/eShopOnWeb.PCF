@@ -23,7 +23,8 @@
     </Content>
     <Content Include="Setup\**\*;">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>   
+    </Content>
+    <Compile Remove="Model\IReadOnlyRepository.cs" />   
     <Compile Include="IntegrationEvents\EventHandling\AnyFutureIntegrationEventHandler.cs.txt" />
     <Content Update="web.config;">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

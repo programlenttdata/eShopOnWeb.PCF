@@ -13,6 +13,7 @@ using Microsoft.eShopOnContainers.Services.Catalog.API.ViewModel;
 
 using Catalog.API.IntegrationEvents;
 using Catalog.API.Model;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 {
@@ -20,14 +21,15 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
     [ApiController]
     public class CatalogController : Controller
     {
-        private readonly CatalogSettings _settings;
+        private readonly CatalogSettings _settings;        
         private readonly ICatalogIntegrationEventService _catalogIntegrationEventService;
 
         private readonly CachedCatalogService _catalogService;
+        
 
-        public CatalogController(ICatalogService catalogService, IOptionsSnapshot<CatalogSettings> settings, 
-            ICatalogIntegrationEventService catalogIntegrationEventService)
-        {
+        public CatalogController(ICachedCatalogService catalogService, IOptionsSnapshot<CatalogSettings> settings,
+           ICatalogIntegrationEventService catalogIntegrationEventService)
+        {            
             _catalogService = catalogService is CachedCatalogService ? (catalogService as CachedCatalogService) : null;
             _catalogIntegrationEventService = catalogIntegrationEventService ?? throw new ArgumentNullException(nameof(catalogIntegrationEventService));
             _settings = settings.Value;
@@ -40,8 +42,9 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<CatalogItem>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Items([FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0, [FromQuery] string ids = null)
         {
-            var cacheFilter = new CacheCatalogFilter { Key = Request.Path.Value, PageSize = pageSize, PageIndex = pageIndex };
-            
+            var cacheFilter = new CacheCatalogFilter { Key = $"{Request.Path.Value}{Request.QueryString}", PageSize = pageSize, PageIndex = pageIndex };
+
+
             var pageItemsValue = await _catalogService.ListAsync(ids, null, cacheFilter);
 
             if (pageItemsValue == null)
@@ -90,7 +93,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
         public async Task<IActionResult> Items(string name, [FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0)
         {
 
-            var cacheFilter = new CacheCatalogFilter { Key = Request.Path.Value, PageSize = pageSize, PageIndex = pageIndex };
+            var cacheFilter = new CacheCatalogFilter { Key = $"{Request.Path.Value}{Request.QueryString}", PageSize = pageSize, PageIndex = pageIndex };
 
             var filteredItemsValue = await _catalogService.ListAsync(new CatalogFilterSpecification(name), cacheFilter);
             var itemsOnPage = ChangeUriPlaceholder(filteredItemsValue.ToList());
@@ -107,7 +110,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
         public async Task<IActionResult> Items(int catalogTypeId, int? catalogBrandId, [FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0)
         {
             var catalogSpec = new CatalogFilterSpecification(catalogTypeId, catalogBrandId);
-            var cacheFilter = new CacheCatalogFilter { Key = Request.Path.Value, PageSize = pageSize, PageIndex = pageIndex };
+            var cacheFilter = new CacheCatalogFilter { Key = $"{Request.Path.Value}{Request.QueryString}", PageSize = pageSize, PageIndex = pageIndex };
 
             var filteredItemsValue = await _catalogService.ListAsync(catalogSpec, cacheFilter);
             var itemsOnPage = ChangeUriPlaceholder(filteredItemsValue.ToList());
@@ -125,7 +128,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
         public async Task<IActionResult> Items(int? catalogBrandId, [FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0)
         {
             var catalogSpec = new CatalogFilterSpecification(null, catalogBrandId);
-            var cacheFilter = new CacheCatalogFilter { Key = Request.Path.Value, PageSize = pageSize, PageIndex = pageIndex };
+            var cacheFilter = new CacheCatalogFilter { Key = $"{Request.Path.Value}{Request.QueryString}", PageSize = pageSize, PageIndex = pageIndex };
 
             var filteredItemsValue = await _catalogService.ListAsync(catalogSpec, cacheFilter);
             var itemsOnPage = ChangeUriPlaceholder(filteredItemsValue.ToList());

@@ -62,9 +62,13 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
             services.AddCloudFoundryActuators(Configuration);
 
-            services.AddScoped<ICatalogService, CachedCatalogService>();
+            services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));            
+            services.AddScoped<ICachedCatalogService, CachedCatalogService>();            
+            services.AddScoped<ICatalogItemRepository, CatalogItemRepository>();            
+            services.AddScoped<CatalogService>();
 
-            var container = new ContainerBuilder();           
+            var container = new ContainerBuilder();
+
             container.Populate(services);
 
             return new AutofacServiceProvider(container.Build());
