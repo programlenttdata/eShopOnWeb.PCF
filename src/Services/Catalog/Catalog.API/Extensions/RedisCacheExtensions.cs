@@ -4,28 +4,17 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Extensions.Caching.Distributed;
+using System.Collections.Generic;
 
 namespace Catalog.API.Extensions
 {
     public static class RedisCacheExtensions
     {
-        private static IDistributedCache distributedCache;
-        private static IDistributedCache DistributedCache
-        {
-            get { return distributedCache; }
-            set
-            {
-                if (distributedCache == null)
-                {
-                    distributedCache = value;
-                }
-            }
-        }
+        public static readonly string KEYS = "KEYS";
 
         public static async Task<T> TryGetAsync<T>(this IDistributedCache cache, string key)
         {
-            DistributedCache = cache;
-            var value = await DistributedCache.GetAsync(key);
+            var value = await cache.GetAsync(key);
 
             if (value != null)
             {
@@ -39,27 +28,50 @@ namespace Catalog.API.Extensions
             if (value == null)
                 return;
 
-            DistributedCache = cache;
-            T temp = await DistributedCache.TryGetAsync<T>(key);
+            T temp = await cache.TryGetAsync<T>(key);
 
             if (temp == null || temp.Equals(default(T)))
             {
                 var array = ToByteArray<T>(value);
-                await DistributedCache.SetAsync(key, array);
+                cache.SetKeysAsync(key);
+                await cache.SetAsync(key, array);
             }
         }
 
-        public static async Task TryResetAsync<T>(this IDistributedCache cache, string key, T value)
+        public static async Task<bool> TryResetAsync<T>(this IDistributedCache cache, string key, T value)
         {
-            DistributedCache = cache;
-            T temp = await DistributedCache.TryGetAsync<T>(key);
+            T temp = await cache.TryGetAsync<T>(key);
 
             if (temp != null && !temp.Equals(default(T)))
             {
-                var array = ToByteArray<T>(value);
-                await DistributedCache.RemoveAsync(key);
-                await DistributedCache.TrySetAsync(key, array);
+                await cache.RemoveAsync(key);
             }
+
+            var array = ToByteArray<T>(value);
+            await cache.TrySetAsync(key, value);
+
+            return true;
+        }
+
+        public static async Task<bool> RemovePartialAsync<T>(this IDistributedCache cache, List<string> dismissList)
+        {
+            var values = await cache.TryGetAsync<List<string>>(KEYS);
+            return await Task.Run(async () => {
+                values.ForEach(async k =>
+                {
+                    if (!dismissList.Contains(k))
+                    {
+                        T temp = await cache.TryGetAsync<T>(k);
+
+                        if (temp != null && !temp.Equals(default(T)))
+                        {
+                            await cache.RemoveAsync(k);
+                        }
+                    }
+                });
+                await cache.RemoveAsync(KEYS);
+                return true;
+            });            
         }
 
         private static byte[] ToByteArray<T>(T obj)
@@ -85,6 +97,22 @@ namespace Catalog.API.Extensions
             {
                 return (T)bf.Deserialize(ms);
             }
+        }
+
+        private static async void SetKeysAsync(this IDistributedCache cache, string key)
+        {
+            var values = await cache.TryGetAsync<List<string>>(KEYS);
+
+            if (values == null)
+                values = new List<string>();
+
+            if (!values.Contains(key))
+            {
+                values.Add(key);
+            }
+
+            var array = ToByteArray<List<string>>(values);
+            await cache.SetAsync(KEYS, array);
         }
     }
 }
