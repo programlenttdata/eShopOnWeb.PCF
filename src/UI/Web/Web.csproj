@@ -13,7 +13,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Interfaces\IIdentityParser.cs" />
 	  <Compile Remove="Services\BasketViewModelService.cs" />
+	  <Compile Remove="ViewModels\ApplicationUser.cs" />
 	</ItemGroup>
         
 	<ItemGroup>

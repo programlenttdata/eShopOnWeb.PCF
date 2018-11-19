@@ -8,11 +8,15 @@ using System.Threading.Tasks;
 using Microsoft.eShopWeb.Web.Models;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Services;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+
+
+
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.eShopWeb.Web.Services
 {
-    public class BasketService : IBasketService
+   public class BasketService : IBasketService
     {
         private readonly ILogger<BasketService> _logger;
         private readonly HttpClient _apiClient;

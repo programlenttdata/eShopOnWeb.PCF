@@ -5,13 +5,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 //using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 //using Microsoft.eShopWeb.ApplicationCore.Services;
 using Microsoft.eShopWeb.Comm;
-using Microsoft.eShopWeb.Infrastructure.Data;
-using Microsoft.eShopWeb.Infrastructure.Identity;
-using Microsoft.eShopWeb.Infrastructure.Logging;
-using Microsoft.eShopWeb.Infrastructure.Services;
+using Microsoft.eShopWeb.Web.ViewModels;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +23,7 @@ using Steeltoe.Management.CloudFoundry;
 using System;
 using System.Net.Http;
 using System.Text;
+
 using Microsoft.Extensions.Options;
 using Steeltoe.CloudFoundry.Connector;
 
@@ -44,10 +43,10 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddIdentity<ApplicationUser, IdentityRole>()
-            //     .AddEntityFrameworkStores<AppIdentityDbContext>()
-            //     .AddDefaultTokenProviders();
-
+           /*  services.AddIdentity<ApplicationUser, IdentityRole>()
+                 .AddEntityFrameworkStores<AppIdentityDbContext>()
+                 .AddDefaultTokenProviders();
+                 */
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -67,7 +66,7 @@ namespace Microsoft.eShopWeb.Web
            // services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<ICatalogService, CachedCatalogService>();
-            services.AddScoped<IBasketService, BasketService>();
+            //services.AddScoped<IBasketService, BasketService>();
 
 
             // services.AddScoped<IBasketViewModelService, BasketViewModelService>();
@@ -133,7 +132,7 @@ namespace Microsoft.eShopWeb.Web
                 return new BasketService(httpClient, logger);
             });
 
-            //  services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+            services.AddTransient<Microsoft.eShopWeb.ApplicationCore.Interfaces.IIdentityParser<ApplicationUser>, IdentityParser>();
 
             _services = services;
         }
@@ -274,7 +273,7 @@ namespace Microsoft.eShopWeb.Web
             //   .AddPolicyHandler(GetCircuitBreakerPolicy());
 
             //add custom application services
-          //  services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+            //services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser<ApplicationUser>>();
 
             return services;
         }

@@ -5,6 +5,8 @@ using Microsoft.eShopWeb.Web.ViewModels;
 using Polly.CircuitBreaker;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+//using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Interfaces;
 
 namespace Microsoft.eShopWeb.Web.Controllers
@@ -15,9 +17,9 @@ namespace Microsoft.eShopWeb.Web.Controllers
     {
         private readonly IBasketService _basketSvc;
         private readonly ICatalogService _catalogSvc;
-        private readonly IIdentityParser<ApplicationUser> _appUserParser;
+        private readonly Microsoft.eShopWeb.ApplicationCore.Interfaces.IIdentityParser<ApplicationUser> _appUserParser;
 
-        public BasketController(IBasketService basketSvc, ICatalogService catalogSvc, IIdentityParser<ApplicationUser> appUserParser)
+        public BasketController(IBasketService basketSvc, ICatalogService catalogSvc, ApplicationCore.Interfaces.IIdentityParser<ApplicationUser> appUserParser)
         {
             _basketSvc = basketSvc;
             _catalogSvc = catalogSvc;

@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.eShopWeb.Web.Models;
 using Microsoft.eShopWeb.Web.ViewModels;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

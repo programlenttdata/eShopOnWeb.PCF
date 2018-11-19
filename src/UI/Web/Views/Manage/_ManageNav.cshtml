@@ -1,4 +1,4 @@
-﻿@inject SignInManager<Microsoft.eShopWeb.Web.ViewModels.ApplicationUser> SignInManager
+﻿@inject SignInManager<Microsoft.eShopWeb.Infrastructure.Identity.ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
