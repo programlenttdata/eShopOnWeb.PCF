@@ -1,29 +1,31 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels;
 using Polly.CircuitBreaker;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using IBasketService = Microsoft.eShopWeb.Web.Interfaces.IBasketService;
+using Microsoft.eShopWeb.Web.Interfaces;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
-    [Authorize]
-    public class CartController : Controller
+    //[Authorize]
+    [Route("Basket/[action]")]
+    public class BasketController : Controller
     {
         private readonly IBasketService _basketSvc;
         private readonly ICatalogService _catalogSvc;
         private readonly IIdentityParser<ApplicationUser> _appUserParser;
 
-        public CartController(IBasketService basketSvc, ICatalogService catalogSvc, IIdentityParser<ApplicationUser> appUserParser)
+        public BasketController(IBasketService basketSvc, ICatalogService catalogSvc, IIdentityParser<ApplicationUser> appUserParser)
         {
             _basketSvc = basketSvc;
             _catalogSvc = catalogSvc;
             _appUserParser = appUserParser;
         }
 
+        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> Index()
         {
             try
@@ -64,7 +66,8 @@ namespace Microsoft.eShopWeb.Web.Controllers
             return View();
         }
 
-        public async Task<IActionResult> AddToCart(CatalogItem productDetails)
+        [HttpPost]
+        public async Task<IActionResult> AddItemToBasket(CatalogItem productDetails)
         {
             try
             {

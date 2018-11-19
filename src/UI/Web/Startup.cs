@@ -5,13 +5,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using Microsoft.eShopWeb.ApplicationCore.Services;
+//using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+//using Microsoft.eShopWeb.ApplicationCore.Services;
 using Microsoft.eShopWeb.Comm;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.eShopWeb.Infrastructure.Services;
+using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,8 +25,9 @@ using Steeltoe.Management.CloudFoundry;
 using System;
 using System.Net.Http;
 using System.Text;
-using BasketService = Microsoft.eShopWeb.Web.Services.BasketService;
-using IBasketService = Microsoft.eShopWeb.Web.Interfaces.IBasketService;
+using Microsoft.Extensions.Options;
+using Steeltoe.CloudFoundry.Connector;
+
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -58,23 +60,27 @@ namespace Microsoft.eShopWeb.Web
                 };
             });
 
-            services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
+           // services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
             //services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
 
-            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+           // services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+           // services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
-           // services.AddScoped<IBasketViewModelService, BasketViewModelService>();
-            services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+
+
+            // services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+           // services.AddScoped<IOrderService, OrderService>();
+           // services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<CatalogService>();
             services.Configure<CatalogSettings>(Configuration);
-            services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
 
-            services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
-            services.AddTransient<IEmailSender, EmailSender>();
+
+           //  services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
+
+            // services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
+            //   services.AddTransient<IEmailSender, EmailSender>();
 
             // Add memory cache services
             services.AddMemoryCache();
@@ -93,7 +99,7 @@ namespace Microsoft.eShopWeb.Web
 
             //add http client services
 
-            services.AddHttpClientServices(Configuration);
+           // services.AddHttpClientServices(Configuration);
 
 
             //services.AddHttpClient<ICatalogService, CatalogService>();
@@ -115,7 +121,19 @@ namespace Microsoft.eShopWeb.Web
                 return new CatalogService(httpClient, logger);
             });
 
-            services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+            services.AddScoped<IBasketService>(sp =>
+            {
+                var handler = new DiscoveryHttpClientHandler(sp.GetService<IDiscoveryClient>());
+                var httpClient = new HttpClient(handler, false)
+                {
+                    BaseAddress = new Uri(Configuration.GetValue<string>("PurchaseUrl"))
+                };
+                var logger = sp.GetService<ILogger<BasketService>>();
+
+                return new BasketService(httpClient, logger);
+            });
+
+            //  services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
 
             _services = services;
         }
@@ -202,7 +220,7 @@ namespace Microsoft.eShopWeb.Web
                 options.ResponseType = useLoadTest ? "code id_token token" : "code id_token";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.RequireHttpsMetadata = true;
+                options.RequireHttpsMetadata = false;
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("orders");
@@ -256,7 +274,7 @@ namespace Microsoft.eShopWeb.Web
             //   .AddPolicyHandler(GetCircuitBreakerPolicy());
 
             //add custom application services
-            services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+          //  services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
 
             return services;
         }

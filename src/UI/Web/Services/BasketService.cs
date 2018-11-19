@@ -8,30 +8,28 @@ using System.Threading.Tasks;
 using Microsoft.eShopWeb.Web.Models;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.eShopWeb.Web.Services
 {
     public class BasketService : IBasketService
     {
-        private readonly IOptions<AppSettings> _settings;
+        private readonly ILogger<BasketService> _logger;
         private readonly HttpClient _apiClient;
-        private readonly string _basketByPassUrl;
-        private readonly string _purchaseUrl;
+        private readonly string _basketUrl;
 
-        private readonly string _bffUrl;
-
-        public BasketService(HttpClient httpClient, IOptions<AppSettings> settings)
+        public BasketService(HttpClient httpClient, ILogger<BasketService> logger)
         {
             _apiClient = httpClient;
-            _settings = settings;
+            _logger = logger;
 
-            _basketByPassUrl = $"{_settings.Value.PurchaseUrl}/api/v1/b/basket";
-            _purchaseUrl = $"{_settings.Value.PurchaseUrl}/api/v1";
+            _basketUrl = $"{httpClient.BaseAddress}api/v1/basket";
+
         }
 
         public async Task<Basket> GetBasket(ApplicationUser user)
         {
-            var uri = API.Basket.GetBasket(_basketByPassUrl, user.Id);
+            var uri = API.Basket.GetBasket(_basketUrl, user.Id);
 
             var responseString = await _apiClient.GetStringAsync(uri);
 
@@ -42,7 +40,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task<Basket> UpdateBasket(Basket basket)
         {
-            var uri = API.Basket.UpdateBasket(_basketByPassUrl);
+            var uri = API.Basket.UpdateBasket(_basketUrl);
 
             var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
 
@@ -55,7 +53,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task Checkout(BasketDTO basket)
         {
-            var uri = API.Basket.CheckoutBasket(_basketByPassUrl);
+            var uri = API.Basket.CheckoutBasket(_basketUrl);
             var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
 
             var response = await _apiClient.PostAsync(uri, basketContent);
@@ -65,7 +63,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task<Basket> SetQuantities(ApplicationUser user, Dictionary<string, int> quantities)
         {
-            var uri = API.Purchase.UpdateBasketItem(_purchaseUrl);
+            var uri = API.Purchase.UpdateBasketItem(_basketUrl);
 
             var basketUpdate = new
             {
@@ -90,7 +88,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task<Order> GetOrderDraft(string basketId)
         {
-            var uri = API.Purchase.GetOrderDraft(_purchaseUrl, basketId);
+            var uri = API.Purchase.GetOrderDraft(_basketUrl, basketId);
 
             var responseString = await _apiClient.GetStringAsync(uri);
 
@@ -101,7 +99,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task AddItemToBasket(ApplicationUser user, int productId)
         {
-            var uri = API.Purchase.AddItemToBasket(_purchaseUrl);
+            var uri = API.Purchase.AddItemToBasket(_basketUrl);
 
             var newItem = new
             {
