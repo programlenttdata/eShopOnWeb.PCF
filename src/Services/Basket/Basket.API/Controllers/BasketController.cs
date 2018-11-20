@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.Common.EventBus.Abstractions;
 using Microsoft.eShopOnContainers.Services.Basket.API.Model;
+using Microsoft.eShopOnContainers.Services.Basket.API.ViewModel;
 using Microsoft.eShopOnContainers.Services.Basket.API.Services;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -40,6 +42,35 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
             }
 
             return Ok(basket);
+        }
+
+        // GET api/v1/[controller]/items[?pageSize=3&pageIndex=10]
+        [HttpGet]
+        [Route("items")]
+        [ProducesResponseType(typeof(PaginatedItemsViewModel<BasketItem>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<BasketItem>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Items([FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0, [FromQuery] string ids = null)
+        {
+            //if (!string.IsNullOrEmpty(ids))
+            //{
+            //    return GetItemsByIds(ids);
+            //}
+
+            //var totalItems = await _basketContext.CatalogItems
+            //    .LongCountAsync();
+
+            //var itemsOnPage = await _basketContext.CatalogItems
+            //    .OrderBy(c => c.Name)
+            //    .Skip(pageSize * pageIndex)
+            //    .Take(pageSize)
+            //    .ToListAsync();
+
+            //itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
+
+            var model = new PaginatedItemsViewModel<BasketItem>(
+                pageIndex, pageSize, 10, new BasketItem[0]);
+
+            return Ok(model);
         }
 
         // POST /value
@@ -92,6 +123,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         {
             _repository.DeleteBasketAsync(id);
         }
+
 
     }
 }
