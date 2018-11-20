@@ -122,9 +122,7 @@ namespace NTTData.eShopMonoToMicro.Entities.Orders
         public IEnumerable<OrderItemDTO> OrderItems => _orderItems;
         public CreateOrderCommand(string Username, string buyerId, Address address, IReadOnlyCollection<BasketItem> basketItems)
         {
-            Randomizer.Seed = new Random(91239122);
-            var faker = new Faker("en");
-
+            
             //string userId, string userName, string city, string street, string state, string country, string zipcode,
             //string cardNumber, string cardHolderName, DateTime cardExpiration,
             //string cardSecurityNumber, int cardTypeId
@@ -137,9 +135,7 @@ namespace NTTData.eShopMonoToMicro.Entities.Orders
             State = address.State;
             Country = address.Country;
             ZipCode = address.ZipCode;
-            CardNumber = faker.Finance.CreditCardNumber();
-            CardExpiration = faker.Date.Future(4);
-            CardSecurityNumber = faker.Finance.CreditCardCvv();
+            
             CardTypeId = 1;
         }
 

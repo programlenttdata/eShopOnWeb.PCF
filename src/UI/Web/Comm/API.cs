@@ -33,7 +33,7 @@
 
             public static string AddNewOrder(string baseUri)
             {
-                return $"{baseUri}/new";
+                return $"{baseUri}/";
             }
 
             public static string CancelOrder(string baseUri)

@@ -7,6 +7,7 @@ using Microsoft.eShopOnContainers.Services.Ordering.API.Infrastructure.Services;
 using Ordering.API.Application.Commands;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -120,12 +121,15 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             return Ok(draft);
         }
 
+        
+     
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] PlaceOrderCommand placeOrderCommand)
         {
             var order= await _mediator.Send(placeOrderCommand);
             return Ok(order);
         }
+       
     }
 
 }

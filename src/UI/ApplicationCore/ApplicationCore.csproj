@@ -6,9 +6,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Services\OrderService.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Ardalis.GuardClauses" Version="1.2.3" />
 		<PackageReference Include="System.Security.Claims" Version="4.3.0" />
-		    <PackageReference Include="Bogus" Version="24.1.0"/>
+		    <PackageReference Include="Bogus" Version="24.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+	    <HintPath>..\..\..\..\..\Users\167902\.nuget\packages\microsoft.extensions.logging.abstractions\2.1.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Newtonsoft.Json">
+	    <HintPath>..\..\..\..\..\Users\167902\.nuget\packages\newtonsoft.json\11.0.2\lib\netstandard2.0\Newtonsoft.Json.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

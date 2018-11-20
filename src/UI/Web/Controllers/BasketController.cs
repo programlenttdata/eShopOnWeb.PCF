@@ -78,11 +78,16 @@ namespace Microsoft.eShopWeb.Web.Controllers
             var basketViewModel = await GetBasketViewModelAsync();
             await _basketService.SetQuantities(basketViewModel.Id, items);
 
-            await _orderService.CreateOrderAsync(basketViewModel.Id, new Address("123 Main St.", "Kent", "OH", "United States", "44240"),User.Identity.Name);
-
-            await _basketService.DeleteBasketAsync(basketViewModel.Id);
-
-            return View("Checkout");
+            var response = await _orderService.CreateOrderAsync(basketViewModel.Id, new Address("123 Main St.", "Kent", "OH", "United States", "44240"),User.Identity.Name);
+            if (response.Response == true) { 
+                await _basketService.DeleteBasketAsync(basketViewModel.Id);
+                return View("Checkout");
+            }
+            else
+            {
+                return View("Index");
+            }
+            
         }
 
         private async Task<BasketViewModel> GetBasketViewModelAsync()

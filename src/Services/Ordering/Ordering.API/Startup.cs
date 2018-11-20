@@ -7,22 +7,20 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
     using Autofac.Extensions.DependencyInjection;
     using global::Ordering.API.Application.IntegrationEvents;
     using global::Ordering.API.Application.IntegrationEvents.Events;
-    using global::Ordering.API.Infrastructure.Filters;
     using global::Ordering.API.Infrastructure.Middlewares;
     using Infrastructure.AutofacModules;
     using Infrastructure.Filters;
     using Infrastructure.Services;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights.ServiceFabric;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.eShopOnContainers.BuildingBlocks.EventBus;
     using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
-    using Microsoft.eShopOnContainers.BuildingBlocks.EventBusRabbitMQ;
+    using BuildingBlocks.EventBusRabbitMQ;
     using Microsoft.eShopOnContainers.BuildingBlocks.EventBusServiceBus;
     using Microsoft.eShopOnContainers.BuildingBlocks.IntegrationEventLogEF;
     using Microsoft.eShopOnContainers.BuildingBlocks.IntegrationEventLogEF.Services;
@@ -30,11 +28,10 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.HealthChecks;
     using Microsoft.Extensions.Logging;
+    using Pivotal.Discovery.Client;
     using Ordering.Infrastructure;
     using RabbitMQ.Client;
-    using Swashbuckle.AspNetCore.Swagger;
     using System;
-    using System.Collections.Generic;
     using System.Data.Common;
     using System.IdentityModel.Tokens.Jwt;
     using System.Reflection;
@@ -58,7 +55,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
                 .AddCustomSwagger(Configuration)
                 .AddCustomIntegrations(Configuration)
                 .AddCustomConfiguration(Configuration)
-                .AddEventBus(Configuration);
+                .AddEventBus(Configuration)
+                .AddDiscoveryClient(Configuration);
               //  .AddCustomAuthentication(Configuration);
 
             //configure autofac
@@ -94,6 +92,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
             ConfigureAuth(app);
 
             app.UseMvcWithDefaultRoute();
+            app.UseDiscoveryClient();
 
             app.UseSwagger()
                .UseSwaggerUI(c =>
