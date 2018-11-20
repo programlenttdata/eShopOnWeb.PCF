@@ -201,7 +201,7 @@ namespace Microsoft.eShopWeb.Web
                 options.ResponseType = useLoadTest ? "code id_token token" : "code id_token";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.RequireHttpsMetadata = true;
+                options.RequireHttpsMetadata = Convert.ToBoolean(configuration["RequireHttpsMetadata"] ?? "True");
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("orders");
