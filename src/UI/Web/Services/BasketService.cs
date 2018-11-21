@@ -107,10 +107,21 @@ namespace Microsoft.eShopWeb.Web.Services
 
             var newItem = new
             {
-                CatalogItemId = productId,
-                BasketId = user.Id,
-                Quantity = 1
+                BuyerId = System.String.IsNullOrEmpty(user.Id.ToString()) ? "1" : user.Id.ToString(),
+                Items = new List<BasketItem>()
+                {
+                    new BasketItem()
+                    {
+                        ProductId =  productId.ToString(),
+                        Quantity = 1
+
+                    }
+
+                }
             };
+
+            //public List<BasketItem> Items { get; set; } = new List<BasketItem>();
+            //public string BuyerId { get; set; }
 
             var basketContent = new StringContent(JsonConvert.SerializeObject(newItem), System.Text.Encoding.UTF8, "application/json");
 
