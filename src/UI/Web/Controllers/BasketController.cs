@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.Web.Interfaces;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("Basket/[action]")]
     public class BasketController : Controller
     {
@@ -77,6 +77,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
                 {
                     var user = _appUserParser.Parse(HttpContext.User);
                     await _basketSvc.AddItemToBasket(user, productDetails.Id);
+                    return RedirectToAction("Index", "Order");
                 }
                 return RedirectToAction("Index", "Catalog");
             }
