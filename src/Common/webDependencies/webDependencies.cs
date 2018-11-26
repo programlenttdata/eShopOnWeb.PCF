@@ -4,24 +4,12 @@ using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Microsoft.eShopOnContainers.WebMVC.ViewModels;
+
 using WebMVC.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopOnContainers.WebMVC.ViewModels;
 using Microsoft.eShopOnContainers.WebMVC.ViewModels.Annotations;
 
-namespace webDependencies
-{
-    public interface IOrderingService
-    {
-        Task<List<Order>> GetMyOrders(ApplicationUser user);
-        Task<Order> GetOrder(ApplicationUser user, string orderId);
-        Task CancelOrder(string orderId);
-        Task ShipOrder(string orderId);
-        Order MapUserInfoIntoOrder(ApplicationUser user, Order order);
-        BasketDTO MapOrderToBasket(Order order);
-        void OverrideUserInfoIntoOrder(Order original, Order destination);
-    }
-}
 
 namespace Microsoft.eShopOnContainers.WebMVC.ViewModels
 {
@@ -119,31 +107,7 @@ namespace Microsoft.eShopOnContainers.WebMVC.ViewModels
 }
 
 
-namespace Microsoft.eShopOnContainers.WebMVC.ViewModels
-{
-    // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser :  IdentityUser
-    {
-        public string CardNumber { get; set; }
-        public string SecurityNumber { get; set; }
-        public string Expiration { get; set; }
-        public string CardHolderName { get; set; }
-        public int CardType { get; set; }
-        public string Street { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string StateCode { get; set; }
-        public string Country { get; set; }
-        public string CountryCode { get; set; }
-        public string ZipCode { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public string LastName { get; set; }
-    }
-}
+
 
 namespace WebMVC.Models
 {

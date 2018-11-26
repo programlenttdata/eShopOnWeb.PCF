@@ -26,7 +26,7 @@
                 return $"{baseUri}/{orderId}";
             }
 
-            public static string GetAllMyOrders(string baseUri, string UserId)
+            public static string GetOrders(string baseUri, string UserId)
             {
                 return $"{baseUri}/Orders?UserId={UserId}";
             }

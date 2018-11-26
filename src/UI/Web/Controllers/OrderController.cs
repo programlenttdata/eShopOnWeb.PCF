@@ -3,12 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.eShopWeb.Web.ViewModels;
 using System;
+using System.Collections.Generic;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using System.Linq;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
-using webDependencies;
+using Order = Microsoft.eShopOnContainers.WebMVC.ViewModels.Order;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
@@ -18,33 +21,41 @@ namespace Microsoft.eShopWeb.Web.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderingService  _orderService;
+        private readonly IIdentityParser<ApplicationUser> _appUserParser;
 
-        public OrderController(IOrderingService  orderingService, IOrderRepository orderRepository) {
+        public OrderController(IOrderingService  orderingService, IOrderRepository orderRepository, IIdentityParser<ApplicationUser> appUserParser)
+        {
+            _appUserParser = appUserParser;
             _orderService = orderingService;
             _orderRepository = orderRepository;
         }
         
         public async Task<IActionResult> Index()
         {
-            var orders =  await _orderService.GetMyOrders(User.Identity.Name);
+            var user = _appUserParser.Parse(HttpContext.User);
+            var orders =  await _orderService.GetMyOrders(user);
+            return GenerateOrderViewModel(orders);
+        }
+
+        private ViewResult GenerateOrderViewModel(IEnumerable<Microsoft.eShopOnContainers.WebMVC.ViewModels.Order> orders)
+        {
             var viewModel = orders
                 .Select(o => new OrderViewModel()
                 {
-                    OrderDate = o.OrderDate,
+                    OrderDate = o.Date,
                     OrderItems = o.OrderItems?.Select(oi => new OrderItemViewModel()
                     {
                         Discount = 0,
-                        PictureUrl = oi.ItemOrdered.PictureUri,
-                        ProductId = oi.ItemOrdered.CatalogItemId,
-                        ProductName = oi.ItemOrdered.ProductName,
+                        PictureUrl = oi.PictureUrl,
+                        ProductId = oi.ProductId,
+                        ProductName = oi.ProductName,
                         UnitPrice = oi.UnitPrice,
                         Units = oi.Units
                     }).ToList(),
-                    OrderNumber = o.Id,
-                    ShippingAddress = o.ShipToAddress,
+                    OrderNumber = Convert.ToInt32(o.OrderNumber),
+                    ShippingAddress = new Address(o.City, o.Country, o.State, o.Street, o.ZipCode),
                     Status = "Pending",
-                    Total = o.Total()
-
+                    Total = o.Total
                 });
             return View(viewModel);
         }
@@ -52,33 +63,15 @@ namespace Microsoft.eShopWeb.Web.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> Detail(int orderId)
         {
- 
 
-            var customerOrders =  await _orderService.GetMyOrders(User.Identity.Name);
-            //var customerOrders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
-            var order = customerOrders.FirstOrDefault(o => o.Id == orderId);
+            var user = _appUserParser.Parse(HttpContext.User);
+            var customerOrders =  await _orderService.GetMyOrders(user);
+            var order = customerOrders.FirstOrDefault(o => o.OrderNumber == orderId.ToString());
             if (order == null)
             {
                 return BadRequest("No such order found for this user.");
             }
-            var viewModel = new OrderViewModel()
-            {
-                OrderDate = order.OrderDate,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemViewModel()
-                {
-                    Discount = 0,
-                    PictureUrl = oi.ItemOrdered.PictureUri,
-                    ProductId = oi.ItemOrdered.CatalogItemId,
-                    ProductName = oi.ItemOrdered.ProductName,
-                    UnitPrice = oi.UnitPrice,
-                    Units = oi.Units
-                }).ToList(),
-                OrderNumber = order.Id,
-                ShippingAddress = order.ShipToAddress,
-                Status = "Pending",
-                Total = order.Total()
-            };
-            return View(viewModel);
+            return GenerateOrderViewModel(new List<Order>() { order });
         }
     }
 }
