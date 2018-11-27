@@ -52,10 +52,10 @@ namespace Microsoft.eShopWeb.Web.Controllers
             try
             {
                 var user = _appUserParser.Parse(HttpContext.User);
-                //  var basket = await _basketSvc.SetQuantities(user, quantities);
+                var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
                 if (action == "[ Checkout ]")
                 {
-                    return RedirectToAction("Create", "Order");
+                    return View();
                 }
             }
             catch (BrokenCircuitException)
@@ -85,6 +85,26 @@ namespace Microsoft.eShopWeb.Web.Controllers
                 // Catch error when Basket.api is in circuit-opened mode                 
                 HandleBrokenCircuitException();
                 return RedirectToAction("Index", "Catalog", new { errorMsg = ViewBag.BasketInoperativeMsg });
+            }
+
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBasket()
+        {
+            try
+            {
+                    var user = _appUserParser.Parse(HttpContext.User);
+                    var vm = await _basketSvc.GetBasket(user.Name);
+                    await _basketSvc.UpdateBasket(vm);
+                    return RedirectToAction("Index", "Basket");
+            }
+            catch (BrokenCircuitException)
+            {
+                // Catch error when Basket.api is in circuit-opened mode                 
+                HandleBrokenCircuitException();
+                return RedirectToAction("Index", "Basket", new { errorMsg = ViewBag.BasketInoperativeMsg });
             }
 
 

@@ -145,6 +145,7 @@ using Microsoft.eShopWeb.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 //using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Models;
+using System.Linq;
 //using Basket = Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate.Basket;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services
@@ -219,16 +220,56 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
 
         public async Task<Basket> UpdateBasket(Basket basket)
         {
-            return null;
+            var uri = API.Purchase.UpdateBasketItem(_basketUrl);
+
+            var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _apiClient.PostAsync(uri, basketContent);
+
+            response.EnsureSuccessStatusCode();
+
+            return basket;
+     
         }
         public async Task Checkout(BasketDTO basket)
         {
-            return;
+            var uri = API.Basket.CheckoutBasket(_basketUrl);
+            var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _apiClient.PostAsync(uri, basketContent);
+
+            response.EnsureSuccessStatusCode();
         }
+        //public async Task<Basket> SetQuantities(string userName, Dictionary<string, int> quantities)
+        //{
+        //    return null;
+        //}
+
         public async Task<Basket> SetQuantities(string userName, Dictionary<string, int> quantities)
         {
-            return null;
+            var uri = API.Purchase.UpdateBasketItem(_basketUrl);
+
+            var basketUpdate = new
+            {
+                BasketId = userName,
+                Updates = quantities.Select(kvp => new
+                {
+                    BasketItemId = kvp.Key,
+                    NewQty = kvp.Value
+                }).ToArray()
+            };
+
+            var basketContent = new StringContent(JsonConvert.SerializeObject(basketUpdate), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _apiClient.PutAsync(uri, basketContent);
+
+            response.EnsureSuccessStatusCode();
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject<Basket>(jsonResponse);
         }
+
         public async Task<Microsoft.eShopWeb.Web.ViewModels.Order> GetOrderDraft(string basketId)
         {
             return null;
@@ -260,19 +301,18 @@ namespace Microsoft.eShopWeb.ApplicationCore.Services
 
         //public async Task SetQuantities(int basketId, Dictionary<string, int> quantities)
         //{
-        //    return;
+            
         //    //Guard.Against.Null(quantities, nameof(quantities));
-        //    //var basket = await _basketRepository.GetByIdAsync(basketId);
-        //    //Guard.Against.NullBasket(basketId, basket);
-        //    //foreach (var item in basket.Items)
-        //    //{
-        //    //    if (quantities.TryGetValue(item.Id.ToString(), out var quantity))
-        //    //    {
-        //    //        _logger.LogInformation($"Updating quantity of item ID:{item.Id} to {quantity}.");
-        //    //        item.Quantity = quantity;
-        //    //    }
-        //    //}
-        //    //await _basketRepository.UpdateAsync(basket);
+        //    var basket = await _basketRepository.GetByIdAsync(basketId);
+        //    foreach (var item in basket.Items)
+        //    {
+        //        if (quantities.TryGetValue(item.Id.ToString(), out var quantity))
+        //        {
+        //            _logger.LogInformation($"Updating quantity of item ID:{item.Id} to {quantity}.");
+        //            item.Quantity = quantity;
+        //        }
+        //    }
+        //    await _basketRepository.UpdateAsync(basket);
         //}
 
         //public async Task TransferBasketAsync(string anonymousId, string userName)
