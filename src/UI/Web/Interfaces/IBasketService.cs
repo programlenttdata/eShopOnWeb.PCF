@@ -9,12 +9,17 @@ namespace Microsoft.eShopWeb.Web.Interfaces
 {
     public interface IBasketService
     {
-        Task<Basket> GetBasket(ApplicationUser user);
-        Task AddItemToBasket(ApplicationUser user, int productId);
+        Task<Basket> GetBasket(string user);
+        Task AddItemToBasket(string user, string productName, string pictureUri, decimal unitPrice, int quantity);
         Task<Basket> UpdateBasket(Basket basket);
         Task Checkout(BasketDTO basket);
-        Task<Basket> SetQuantities(ApplicationUser user, Dictionary<string, int> quantities);
+        Task<Basket> SetQuantities(string userName, Dictionary<string, int> quantities);
         Task<Order> GetOrderDraft(string basketId);
+    }
+
+    public interface IBasketViewModelService
+    {
+        Task<BasketViewModel> GetOrCreateBasketForUser(string userName);
     }
 }
 

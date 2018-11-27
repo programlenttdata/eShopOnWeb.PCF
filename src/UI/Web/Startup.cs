@@ -26,7 +26,7 @@ using System.Text;
 
 using Microsoft.Extensions.Options;
 using Steeltoe.CloudFoundry.Connector;
-
+using Microsoft.eShopWeb.ApplicationCore.Services;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -63,13 +63,13 @@ namespace Microsoft.eShopWeb.Web
             //services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
 
            // services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-           // services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+            //services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<ICatalogService, CachedCatalogService>();
             //services.AddScoped<IBasketService, BasketService>();
 
 
-            // services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+             //services.AddScoped<IBasketViewModelService, BasketViewModelService>();
            // services.AddScoped<IOrderService, OrderService>();
            // services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<CatalogService>();
