@@ -46,10 +46,10 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-             /*services.AddIdentity<ApplicationUser, IdentityRole>()
-                 .AddEntityFrameworkStores<AppIdentityDbContext>()
-                 .AddDefaultTokenProviders();
-                 */
+            // services.AddIdentity<ApplicationUser, IdentityRole>()
+            //     .AddEntityFrameworkStores<AppIdentityDbContext>()
+            //     .AddDefaultTokenProviders();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -63,14 +63,13 @@ namespace Microsoft.eShopWeb.Web
             });
 
             services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
-            services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
+            //services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
 
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
-            
             services.AddScoped<IBasketViewModelService, BasketViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
@@ -101,7 +100,7 @@ namespace Microsoft.eShopWeb.Web
             //services.AddHttpClient<ICatalogService, CatalogService>();
 
             services.AddMvc();
-            //services.AddCustomAuthentication(Configuration);
+            services.AddCustomAuthentication(Configuration);
 
             services.AddCloudFoundryActuators(Configuration);
             services.AddDiscoveryClient(Configuration);
@@ -116,7 +115,7 @@ namespace Microsoft.eShopWeb.Web
                 var logger = sp.GetService<ILogger<CatalogService>>();
                 return new CatalogService(httpClient, logger);
             });
-            services.AddScoped<IOrderService>(sp =>
+   services.AddScoped<IOrderService>(sp =>
             {
                 var _catalogItem = sp.GetService<IAsyncRepository<CatalogItem>>();
                 var _basket  = sp.GetService<IAsyncRepository<Basket>>();
@@ -129,7 +128,6 @@ namespace Microsoft.eShopWeb.Web
                 var basket = sp.GetService<IBasketService>();
                 return new OrderService(_catalogItem, _basket, httpClient, logger);
             });
-
             services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
 
             _services = services;
@@ -217,7 +215,7 @@ namespace Microsoft.eShopWeb.Web
                 options.ResponseType = useLoadTest ? "code id_token token" : "code id_token";
                 options.SaveTokens = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = Convert.ToBoolean(configuration["RequireHttpsMetadata"] ?? "True");
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("orders");
