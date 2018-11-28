@@ -18,7 +18,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
     {
         private readonly IBasketService _basketService;
         private readonly IUriComposer _uriComposer;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        //private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IAppLogger<BasketController> _logger;
         private readonly IOrderService _orderService;
         private readonly IBasketViewModelService _basketViewModelService;
@@ -27,12 +27,12 @@ namespace Microsoft.eShopWeb.Web.Controllers
             IBasketViewModelService basketViewModelService,
             IOrderService orderService,
             IUriComposer uriComposer,
-            SignInManager<ApplicationUser> signInManager,
+            //SignInManager<ApplicationUser> signInManager,
             IAppLogger<BasketController> logger)
         {
             _basketService = basketService;
             _uriComposer = uriComposer;
-            _signInManager = signInManager;
+            //_signInManager = signInManager;
             _logger = logger;
             _orderService = orderService;
             _basketViewModelService = basketViewModelService;
@@ -92,7 +92,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
 
         private async Task<BasketViewModel> GetBasketViewModelAsync()
         {
-            if (_signInManager.IsSignedIn(HttpContext.User))
+            //if (_signInManager.IsSignedIn(HttpContext.User))
             {
                 return await _basketViewModelService.GetOrCreateBasketForUser(User.Identity.Name);
             }

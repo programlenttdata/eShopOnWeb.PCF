@@ -103,7 +103,7 @@ namespace UnitTest.Ordering.Application
 
             //Act
             var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object);
-            var actionResult = await orderController.GetOrders() as OkObjectResult;
+            var actionResult = await orderController.GetOrders("1") as OkObjectResult;
 
             //Assert
             Assert.Equal(actionResult.StatusCode, (int)System.Net.HttpStatusCode.OK);

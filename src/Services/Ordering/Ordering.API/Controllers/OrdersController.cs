@@ -83,19 +83,11 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             }
         }
 
-        [Route("{UserId:Guid}")]
+        
+ 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetOrders()
-        {
-            //var userid = _identityService.GetUserIdentity();
-            //var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.Parse(userid));
-            var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.NewGuid());
-            return Ok(orders);
-        }
-        [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<OrderSummary>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetOrders(string UserId)
+        public async Task<IActionResult> GetOrders([FromQuery] string UserId)
         {
             var orders = await _orderQueries.GetOrdersFromUserAsync(UserId);
             return Ok(orders);

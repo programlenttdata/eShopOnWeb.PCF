@@ -8,7 +8,7 @@ using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.Comm;
 using Microsoft.Extensions.Logging;
-using Microsoft.eShopWeb.ApplicationCore.Services;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 using Newtonsoft.Json;
 
 namespace Microsoft.eShopWeb.Web.Services
@@ -49,5 +49,27 @@ namespace Microsoft.eShopWeb.Web.Services
             return  await response.Content.ReadAsAsync<OrderResponse>();
 
         }
+        async public Task<Order> GetOrder(ApplicationUser user, string id)
+        {
+            var uri = API.Order.GetOrder(_remoteServiceBaseUrl, id);
+
+            var responseString = await _httpClient.GetStringAsync(uri);
+
+            var response = JsonConvert.DeserializeObject<Order>(responseString);
+
+            return response;
+        }
+
+        async public Task<List<Order>> GetMyOrders(ApplicationUser user)
+        {
+            var uri = API.Order.GetOrders(_remoteServiceBaseUrl, user.Id);
+
+            var responseString = await _httpClient.GetStringAsync(uri);
+
+            var response = JsonConvert.DeserializeObject<List<Order>>(responseString);
+
+            return response;
+        }
+
     }
 }

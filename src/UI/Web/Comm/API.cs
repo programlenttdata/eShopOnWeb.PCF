@@ -28,7 +28,7 @@
 
             public static string GetOrders(string baseUri, string UserId)
             {
-                return $"{baseUri}/Orders?UserId={UserId}";
+                return $"{baseUri}/?UserId={UserId}";
             }
 
             public static string AddNewOrder(string baseUri)
