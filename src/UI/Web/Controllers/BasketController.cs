@@ -52,7 +52,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
             try
             {
                 var user = _appUserParser.Parse(HttpContext.User);
-                var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
+               // var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
                 if (action == "[ Checkout ]")
                 {
                     return View();
@@ -97,6 +97,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
             {
                     var user = _appUserParser.Parse(HttpContext.User);
                     var vm = await _basketSvc.GetBasket(user.Name);
+                    //var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
                     await _basketSvc.UpdateBasket(vm);
                     return RedirectToAction("Index", "Basket");
             }
