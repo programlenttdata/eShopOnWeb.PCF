@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Remove="Certificate\idsrv3test.pfx" />
+    <EmbeddedResource Include="Certificate\idsrv3test.pfx" />
   </ItemGroup>
 
   <ItemGroup>

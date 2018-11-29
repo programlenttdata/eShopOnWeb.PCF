@@ -2,7 +2,6 @@
 using Microsoft.eShopWeb.Web.Controllers;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels;
-//using Microsoft.eShopWeb.Web.ViewModels.CatalogViewModels;
 using Moq;
 using System.Collections.Generic;
 using System.Threading.Tasks;

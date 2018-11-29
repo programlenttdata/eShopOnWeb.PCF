@@ -175,13 +175,13 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
             }
 
             var oldPrice = catalogItem.Price;
-            var raiseProductPriceChangedEvent = oldPrice != itemToUpdate.Price;
+            var PriceChanged = oldPrice != itemToUpdate.Price;
 
 
             // Update current product
             catalogItem = itemToUpdate;
 
-            if (raiseProductPriceChangedEvent) // Save product's data and publish integration event through the Event Bus if price has changed
+            if (PriceChanged) // Save product's data and publish integration event through the Event Bus if price has changed
             {
                 await _catalogService.UpdateAsync(catalogItem, false);
                 //Create Integration Event to be published through the Event Bus
