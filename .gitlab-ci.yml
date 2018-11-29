@@ -62,6 +62,38 @@ build_job_identity:
       fi;
   allow_failure: true
 
+  build_job_ordering:
+  stage: build
+  artifacts:
+    paths:
+      - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
+        pwd
+        cd src/Services/Ordering/Ordering.API
+        dotnet restore
+        dotnet build
+        dotnet publish
+      else
+        echo "Skipping Ordering.API build coz no change was detected in the Ordering.API project"
+        exit 1
+      fi;
+  allow_failure: true
+
+test_job_ordering:
+  stage: test
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/UI/; then
+        dotnet test src/Services/Ordering/Ordering.UnitTests
+      else
+        echo "Skipping Order tests because no change was detected in the Web test project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_ordering
+
 test_job_web:
   stage: test
   script:
@@ -145,4 +177,23 @@ deploy_job_identity:
       fi;
   dependencies:
     - build_job_identity
+  allow_failure: true
+
+deploy_job_ordering:
+  stage: deploy
+  artifacts:
+    paths:
+      - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
+  script:
+    - |
+      if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
+        cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -o NTTD-PCF-RG-org -s eshop
+        cf push -f manifest-Ordering.yml
+      else
+        echo "Skipping Ordering.API deploy because no change was detected in the Ordering.API project"
+        exit 1
+      fi;
+  dependencies:
+    - build_job_ordering
+    - test_job_ordering
   allow_failure: true
