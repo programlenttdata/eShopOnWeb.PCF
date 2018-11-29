@@ -62,7 +62,7 @@ build_job_identity:
       fi;
   allow_failure: true
 
-  build_job_ordering:
+build_job_ordering:
   stage: build
   artifacts:
     paths:
