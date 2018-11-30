@@ -85,10 +85,10 @@ test_job_ordering:
   stage: test
   script:
     - |
-      if git diff HEAD~ --name-only|grep src/UI/; then
+      if git diff HEAD~ --name-only|grep src/Service/Ordering/; then
         dotnet test src/Services/Ordering/Ordering.UnitTests
       else
-        echo "Skipping Order tests because no change was detected in the Web test project"
+        echo "Skipping Order tests because no change was detected in the Ordering projects"
         exit 1
       fi;
   dependencies:
@@ -96,7 +96,7 @@ test_job_ordering:
 
 test_job_web:
   stage: test
-  script:
+  script:""
     - |
       if git diff HEAD~ --name-only|grep src/UI/; then
         dotnet test tests/UnitTests
