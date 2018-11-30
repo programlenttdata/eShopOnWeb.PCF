@@ -96,7 +96,7 @@ test_job_ordering:
 
 test_job_web:
   stage: test
-  script:""
+  script:
     - |
       if git diff HEAD~ --name-only|grep src/UI/; then
         dotnet test tests/UnitTests
