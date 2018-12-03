@@ -15,6 +15,7 @@ namespace Microsoft.eShopWeb.Web.Interfaces
         Task Checkout(BasketDTO basket);
         Task<Basket> SetQuantities(string userName, Dictionary<string, int> quantities);
         Task<Order> GetOrderDraft(string basketId);
+
     }
 
     public interface IBasketViewModelService

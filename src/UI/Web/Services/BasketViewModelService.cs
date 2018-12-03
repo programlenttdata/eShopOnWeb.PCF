@@ -1,9 +1,9 @@
 ﻿//using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 //using Microsoft.eShopWeb.ApplicationCore.Specifications;
-//using Microsoft.eShopWeb.ApplicationCore.Entities;
-//using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
-//using Microsoft.eShopWeb.Web.Interfaces;
+//using Microsoft.eShopWeb.Web.Models;
 //using Microsoft.eShopWeb.Web.ViewModels;
+////using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
+//using Microsoft.eShopWeb.Web.Interfaces;
 //using System.Collections.Generic;
 //using System.Linq;
 //using System.Threading.Tasks;
@@ -14,10 +14,10 @@
 //    {
 //        private readonly IAsyncRepository<Basket> _basketRepository;
 //        private readonly IUriComposer _uriComposer;
-//        private readonly IRepository<ApplicationCore.Entities.CatalogItem> _itemRepository;
+//        private readonly IRepository<CatalogItem> _itemRepository;
 
 //        public BasketViewModelService(IAsyncRepository<Basket> basketRepository,
-//            IRepository<ApplicationCore.Entities.CatalogItem> itemRepository,
+//            IRepository<CatalogItem> itemRepository,
 //            IUriComposer uriComposer)
 //        {
 //            _basketRepository = basketRepository;

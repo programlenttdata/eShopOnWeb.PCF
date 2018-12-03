@@ -1,17 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels;
 using Polly.CircuitBreaker;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 //using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Interfaces;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
-    [Authorize]
     [Route("basket/[action]")]
     public class BasketController : Controller
     {
@@ -27,7 +30,6 @@ namespace Microsoft.eShopWeb.Web.Controllers
         }
 
         [HttpGet]
-        [HttpPost]
         public async Task<IActionResult> Index()
         {
             try
@@ -45,6 +47,28 @@ namespace Microsoft.eShopWeb.Web.Controllers
 
             return View();
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Index(Dictionary<string, int> mybasket)
+        {
+            try
+            {
+                var user = _appUserParser.Parse(HttpContext.User);
+                var vm = await _basketSvc.GetBasket(user.Name);
+
+                var basket = await _basketSvc.SetQuantities(user.Name, mybasket);
+                await _basketSvc.UpdateBasket(vm);
+                return RedirectToAction("Index", "Basket");
+            }
+            catch (BrokenCircuitException)
+            {
+                // Catch error when Basket.api is in circuit-opened mode                 
+                HandleBrokenCircuitException();
+                return RedirectToAction("Index", "Basket", new { errorMsg = ViewBag.BasketInoperativeMsg });
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Checkout(Dictionary<string, int> quantities, string action)
@@ -85,27 +109,6 @@ namespace Microsoft.eShopWeb.Web.Controllers
                 // Catch error when Basket.api is in circuit-opened mode                 
                 HandleBrokenCircuitException();
                 return RedirectToAction("Index", "Catalog", new { errorMsg = ViewBag.BasketInoperativeMsg });
-            }
-
-
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateBasket()
-        {
-            try
-            {
-                    var user = _appUserParser.Parse(HttpContext.User);
-                    var vm = await _basketSvc.GetBasket(user.Name);
-                    //var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
-                    await _basketSvc.UpdateBasket(vm);
-                    return RedirectToAction("Index", "Basket");
-            }
-            catch (BrokenCircuitException)
-            {
-                // Catch error when Basket.api is in circuit-opened mode                 
-                HandleBrokenCircuitException();
-                return RedirectToAction("Index", "Basket", new { errorMsg = ViewBag.BasketInoperativeMsg });
             }
 
 
