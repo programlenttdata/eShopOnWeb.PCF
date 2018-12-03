@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 //using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Interfaces;
@@ -35,7 +36,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
             try
             {
                 var user = _appUserParser.Parse(HttpContext.User);
-                var vm = await _basketSvc.GetBasket(user.Name);
+                var vm = await _basketSvc.GetBasket(user.Id);
 
                 return View(vm);
             }
@@ -50,14 +51,14 @@ namespace Microsoft.eShopWeb.Web.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Index(Dictionary<string, int> mybasket)
+        public async Task<IActionResult> Index(Dictionary<string, int> items)
         {
             try
             {
                 var user = _appUserParser.Parse(HttpContext.User);
-                var vm = await _basketSvc.GetBasket(user.Name);
+                var vm = await _basketSvc.GetBasket(user.Id);
 
-                var basket = await _basketSvc.SetQuantities(user.Name, mybasket);
+                var basket = await _basketSvc.SetQuantities(user.Id, items);
                 await _basketSvc.UpdateBasket(vm);
                 return RedirectToAction("Index", "Basket");
             }
@@ -76,7 +77,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
             try
             {
                 var user = _appUserParser.Parse(HttpContext.User);
-               // var basket = await _basketSvc.SetQuantities(user.UserName, quantities);
+                var basket = await _basketSvc.SetQuantities(user.Id, quantities);
                 if (action == "[ Checkout ]")
                 {
                     return View();
@@ -91,7 +92,7 @@ namespace Microsoft.eShopWeb.Web.Controllers
             return View();
         }
 
-        [HttpPost]
+        [HttpPost, HttpPut]
         public async Task<IActionResult> AddItemToBasket(CatalogItemViewModel productDetails)
         {
             try
@@ -99,7 +100,11 @@ namespace Microsoft.eShopWeb.Web.Controllers
                 if (productDetails?.Id != null)
                 {
                     var user = _appUserParser.Parse(HttpContext.User);
-                    await _basketSvc.AddItemToBasket(user.Name, productDetails.Name, productDetails.PictureUri, productDetails.Price, 1);
+                    if (String.IsNullOrWhiteSpace(user.Id) )
+                    {
+                        return Content("Please Login");
+                    }
+                    await _basketSvc.AddItemToBasket(user.Id, productDetails.Id.ToString(), productDetails.Name, productDetails.PictureUri, productDetails.Price, 1);
                     return RedirectToAction("Index", "Basket");
                 }
                 return RedirectToAction("Index", "Catalog");

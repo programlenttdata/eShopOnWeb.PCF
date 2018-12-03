@@ -17,10 +17,10 @@ namespace Microsoft.eShopWeb.Web.ViewModels
         // for read/write properties.
         public int Id { get; set; }
 
-        [BindProperty(SupportsGet = false, Name = "quantity")]
+        [BindProperty(SupportsGet = false)]
         public List<BasketItem> Items { get; set; } = new List<BasketItem>();
 
-        [BindProperty(SupportsGet = false, Name = "basketid")]
+        [BindProperty(SupportsGet = false)]
         public string BuyerId { get; set; }
 
         public decimal Total()

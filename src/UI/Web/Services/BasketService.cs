@@ -30,14 +30,14 @@ namespace Microsoft.eShopWeb.Web.Services
 
         }
 
-        public async Task<Basket> GetBasket(string userName)
+        public async Task<Basket> GetBasket(string userId)
         {
-            var uri = API.Basket.GetBasket(_basketUrl, userName);
+            var uri = API.Basket.GetBasket(_basketUrl, userId);
 
             var responseString = await _apiClient.GetStringAsync(uri);
 
             return string.IsNullOrEmpty(responseString) ?
-                new Basket() { BuyerId = userName } :
+                new Basket() { BuyerId = userId } :
                 JsonConvert.DeserializeObject<Basket>(responseString);
         }
 
@@ -64,14 +64,14 @@ namespace Microsoft.eShopWeb.Web.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task<Basket> SetQuantities(string userName, Dictionary<string, int> quantities)
+        public async Task<Basket> SetQuantities(string userId, Dictionary<string, int> quantities)
         {
             var uri = API.Purchase.UpdateBasketItem(_basketUrl);
 
             var basketUpdate = new
             {
-                BasketId = userName,
-                Updates = quantities
+                BuyerId = userId,
+                items = quantities
                     .Where(x => x.Value > 0)
                     .Select(kvp => new
                 {
@@ -103,18 +103,14 @@ namespace Microsoft.eShopWeb.Web.Services
         }
 
 
-        public async Task AddItemToBasket(string userName, string productName, string pictureUri, decimal unitPrice, int quantity = 1) //int basketId, int catalogItemId, decimal price, int quantity)
+        public async Task AddItemToBasket(string userName, string productid, string productName, string pictureUri, decimal unitPrice, int quantity = 1) //int basketId, int catalogItemId, decimal price, int quantity)
         {
             var uri = API.Purchase.AddItemToBasket(_basketUrl);
-            //var responseString = await _apiClient.GetStringAsync(basketId.ToString());
             var basket = await GetBasket(userName);
-            //var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
-            //await _apiClient.PostAsync(uri, basketContent);
-
-            //            var uri = API.Purchase.AddItemToBasket(_basketUrl);
-
             basket.Items.Add(new BasketItem()
             {
+                Id = userName,
+                ProductId =   productid,
                 ProductName = productName,
                 PictureUrl = pictureUri,
                 UnitPrice = unitPrice,

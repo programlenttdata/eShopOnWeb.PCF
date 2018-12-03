@@ -34,8 +34,8 @@
                             <section class="esh-basket-item esh-basket-item--middle col-xs-3">@item.ProductName</section>
                             <section class="esh-basket-item esh-basket-item--middle col-xs-2">$ @item.UnitPrice.ToString("N2")</section>
                             <section class="esh-basket-item esh-basket-item--middle col-xs-2">
-                                <input type="hidden" i="basketid" name="basketid" value="@item.Id" />
-                                <input type="number" class="esh-basket-input" min="1" name="quantity" value="@item.Quantity" />
+                                <input type="hidden" i="basketid" name="@("Items[" + i + "].Key")"  value="@item.ProductId" />
+                                <input type="number" class="esh-basket-input" min="1" name="@("Items[" + i + "].Value")" value="@item.Quantity" />
                             </section>
                             <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-xs-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
                         </div>
