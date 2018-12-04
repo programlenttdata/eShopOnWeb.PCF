@@ -78,9 +78,40 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Post([FromBody]CustomerBasket value)
         {
+
             var basket = await _repository.UpdateBasketAsync(value);
 
             return Ok(basket);
+        }
+
+        [HttpPatch]
+        [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Patch([FromBody]CustomerBasket basketPatch)
+        {
+
+            var basket = await _repository.GetBasketAsync(basketPatch.BuyerId);
+            foreach (var items in  basket.Items)
+            {
+                
+                foreach (var patchItems in basketPatch.Items)
+                {
+                    if (items.ProductId == patchItems.ProductId)
+                    {
+                        patchItems.Id = items.Id;
+                        patchItems.OldUnitPrice = items.OldUnitPrice;
+                        patchItems.PictureUrl = items.PictureUrl;
+                        patchItems.ProductName = items.ProductName;
+                        patchItems.UnitPrice = items.UnitPrice;
+
+                    }
+                }
+
+                
+                
+            }
+            var baskettoReturn = await _repository.UpdateBasketAsync(basketPatch);
+
+            return Ok(basketPatch);
         }
 
         [Route("checkout")]

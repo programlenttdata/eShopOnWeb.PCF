@@ -44,6 +44,17 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Model
             return JsonConvert.DeserializeObject<CustomerBasket>(data);
         }
 
+        public async Task<BasketItem> GetBasketItemAsync(string customerId)
+        {
+            var data = await _database.StringGetAsync(customerId);
+            if (data.IsNullOrEmpty)
+            {
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<BasketItem>(data);
+        }
+
         public async Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket)
         {
             var created = await _database.StringSetAsync(basket.BuyerId, JsonConvert.SerializeObject(basket));
@@ -56,6 +67,20 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Model
             _logger.LogInformation("Basket item persisted succesfully.");
 
             return await GetBasketAsync(basket.BuyerId);
+        }
+
+        public async Task<BasketItem> UpdateBasketItemAsync(BasketItem basket)
+        {
+            var created = await _database.StringSetAsync(basket.ProductId, JsonConvert.SerializeObject(basket));
+            if (!created)
+            {
+                _logger.LogInformation("Problem occur persisting the item.");
+                return null;
+            }
+
+            _logger.LogInformation("Basket item persisted succesfully.");
+
+            return await GetBasketItemAsync(basket.ProductId);
         }
 
         private IServer GetServer()

@@ -47,7 +47,7 @@ namespace Microsoft.eShopWeb.Web.Services
 
             var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _apiClient.PostAsync(uri, basketContent);
+            var response = await _apiClient.PatchAsync(uri, basketContent);
 
             response.EnsureSuccessStatusCode();
 
@@ -75,14 +75,14 @@ namespace Microsoft.eShopWeb.Web.Services
                     .Where(x => x.Value > 0)
                     .Select(kvp => new
                 {
-                    BasketItemId = kvp.Key,
-                    NewQty = kvp.Value
+                    Productid = kvp.Key,
+                    Quantity = kvp.Value
                 }).ToArray()
             };
 
             var basketContent = new StringContent(JsonConvert.SerializeObject(basketUpdate), System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _apiClient.PutAsync(uri, basketContent);
+            var response = await _apiClient.PatchAsync(uri, basketContent);
 
             response.EnsureSuccessStatusCode();
 
