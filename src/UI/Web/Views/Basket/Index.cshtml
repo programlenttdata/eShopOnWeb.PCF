@@ -47,25 +47,26 @@
                             @item.ProductId
                         </div>*@
 
-                    <div class="container">
-                        <article class="esh-basket-titles esh-basket-titles--clean row">
-                            <section class="esh-basket-title col-xs-10"></section>
-                            <section class="esh-basket-title col-xs-2">Total</section>
-                        </article>
-
-                        <article class="esh-basket-items row">
-                            <section class="esh-basket-item col-xs-10"></section>
-                            <section class="esh-basket-item esh-basket-item--mark col-xs-2">$ @Model.Total()</section>
-                        </article>
-
-                        <article class="esh-basket-items row">
-                            <section class="esh-basket-item col-xs-7"></section>
-                            <section class="esh-basket-item col-xs-2">
-                                @*<button class="btn esh-basket-checkout" name="name" value="" type="submit">[ Update ]</button>*@
-                            </section>
-                        </article>
-                    </div>
                 }
+                
+                <div class="container">
+                    <article class="esh-basket-titles esh-basket-titles--clean row">
+                        <section class="esh-basket-title col-xs-10"></section>
+                        <section class="esh-basket-title col-xs-2">Total</section>
+                    </article>
+
+                    <article class="esh-basket-items row">
+                        <section class="esh-basket-item col-xs-10"></section>
+                        <section class="esh-basket-item esh-basket-item--mark col-xs-2">$ @Model.Total()</section>
+                    </article>
+
+                    <article class="esh-basket-items row">
+                        <section class="esh-basket-item col-xs-7"></section>
+                        <section class="esh-basket-item col-xs-2">
+                            @*<button class="btn esh-basket-checkout" name="name" value="" type="submit">[ Update ]</button>*@
+                        </section>
+                    </article>
+                </div>
                 <section class="esh-basket-item col-xs-push-8 col-xs-4">
                     <button class="btn esh-basket-checkout" name="updatebutton" value="" type="submit"
                             asp-action="UpdateBasket">[ Update ]</button>
