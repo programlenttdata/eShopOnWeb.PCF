@@ -162,7 +162,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
                 return BadRequest();
             }
 
-            return NoContent();
+            return Accepted();
 
         }
 
