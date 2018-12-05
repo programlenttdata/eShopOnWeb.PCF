@@ -4,11 +4,18 @@ services:
   cache:
     image: redis
     command: redis-server --requirepass testPassword
+
   sql.data:
     image: microsoft/mssql-server-linux:2017-latest
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+
+  config:
+    image: hyness/spring-cloud-config-server
+
+  eurekareg:
+    image: steeltoeoss/eurekaserver
 
   catalog.api:
     image: eshop/catalog.api:${TAG:-latest}
@@ -18,7 +25,6 @@ services:
     depends_on:
       - sql.data
       - eurekareg
-      - rabbitmq    
-
-  eurekareg:
-    image: steeltoeoss/eurekaserver
+      - rabbitmq 
+      - cache 
+      - config  

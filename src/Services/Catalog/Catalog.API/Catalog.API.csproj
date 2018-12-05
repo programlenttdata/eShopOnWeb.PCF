@@ -45,6 +45,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
     <PackageReference Include="Pivotal.Discovery.CLientCore" Version="2.1.0" />
+    <!--<PackageReference Include="Pivotal.Extensions.Configuration.ConfigServerCore" Version="2.1.0" />-->
     <PackageReference Include="Steeltoe.CloudFoundry.Connector.EFCore" Version="2.1.0" />
     <PackageReference Include="SteelToe.Extensions.Configuration.CloudFoundryCore" Version="2.1.0" />
     <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="2.1.0" />

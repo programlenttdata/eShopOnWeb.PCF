@@ -6,9 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Steeltoe.Extensions.Configuration.CloudFoundry;
+//using Pivotal.Extensions.Configuration.ConfigServer;
 using System;
 using System.IO;
+using Steeltoe.Extensions.Configuration.CloudFoundry;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API
 {
@@ -26,7 +27,6 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
                     new CatalogContextSeed()
                     .SeedAsync(context,env,settings,logger)
                     .Wait();
-
                 })
                 .MigrateDbContext<IntegrationEventLogContext>((_,__)=>{})
                 .Run();
@@ -35,38 +35,15 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
+                .UseKestrel()
                 .ConfigureAppConfiguration(c => c.AddCloudFoundry())
                 .UseCloudFoundryHosting()
-                .AddCloudFoundry()
-                .UseStartup<Startup>()
-                .UseApplicationInsights()
-                //.UseHealthChecks("/hc")
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseWebRoot("Pics")
-                // .ConfigureAppConfiguration((builderContext, config) =>
-                // {
-                //     var builtConfig = config.Build();
-
-                //     var configurationBuilder = new ConfigurationBuilder();
-
-                //     if (Convert.ToBoolean(builtConfig["UseVault"]))
-                //     {
-                //         configurationBuilder.AddAzureKeyVault(
-                //             $"https://{builtConfig["Vault:Name"]}.vault.azure.net/",
-                //             builtConfig["Vault:ClientId"],
-                //             builtConfig["Vault:ClientSecret"]);
-                //     }
-
-                //     configurationBuilder.AddEnvironmentVariables();
-
-                //     config.AddConfiguration(configurationBuilder.Build());
-                // })
-                // .ConfigureLogging((hostingContext, builder) =>
-                // {
-                //     builder.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                //     builder.AddConsole();
-                //     builder.AddDebug();
-                // })                
+                .UseStartup<Startup>()
+                .AddCloudFoundry()
+                //.AddConfigServer()
+                .UseApplicationInsights()
+                .UseWebRoot("Pics")           
                 .Build();    
     }
 }
