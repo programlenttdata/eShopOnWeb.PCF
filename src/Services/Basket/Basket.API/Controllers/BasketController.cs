@@ -151,7 +151,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType((int) HttpStatusCode.Accepted)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<ActionResult> Delete(string id)
         {
