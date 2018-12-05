@@ -83,8 +83,10 @@ namespace Microsoft.eShopWeb.Web.Controllers
             {
                 var user = _appUserParser.Parse(HttpContext.User);
                 var basket = await _basketSvc.SetQuantities(user.Id, items);
+                
                 if (action == "[ Checkout ]")
                 {
+                    await _basketSvc.CleanBasket(basket.BuyerId);
                     return View();
                 }
             }

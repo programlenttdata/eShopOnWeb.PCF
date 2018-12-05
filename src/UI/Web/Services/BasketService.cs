@@ -60,8 +60,15 @@ namespace Microsoft.eShopWeb.Web.Services
             var basketContent = new StringContent(JsonConvert.SerializeObject(basket), System.Text.Encoding.UTF8, "application/json");
 
             var response = await _apiClient.PostAsync(uri, basketContent);
+            
 
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task CleanBasket(string id)
+        {
+            var uri = API.Basket.CleanBasket(_basketUrl, id);
+            var response = await _apiClient.DeleteAsync(uri);
         }
 
         public async Task<Basket> SetQuantities(string userId, Dictionary<string, int> quantities)

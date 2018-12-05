@@ -13,6 +13,8 @@ namespace Microsoft.eShopWeb.Web.Interfaces
         Task AddItemToBasket(string user, string productid,  string productName, string pictureUri, decimal unitPrice, int quantity);
         Task<Basket> UpdateBasket(Basket basket);
         Task Checkout(BasketDTO basket);
+
+        Task CleanBasket(string basketId);
         Task<Basket> SetQuantities(string userId, Dictionary<string, int> quantities);
         Task<Order> GetOrderDraft(string basketId);
 

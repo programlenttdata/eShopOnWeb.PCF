@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 {
@@ -150,9 +151,19 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(string id)
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> Delete(string id)
         {
-            _repository.DeleteBasketAsync(id);
+
+            var response = await _repository.DeleteBasketAsync(id);
+            if (response == false)
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+
         }
 
 
