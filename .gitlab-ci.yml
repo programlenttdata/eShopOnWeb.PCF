@@ -187,13 +187,13 @@ deploy_job_ordering:
       - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
   script:
     - |
-      if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
+    # if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
         cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -o NTTD-PCF-RG-org -s eshop
         cf push -f manifest-Ordering.yml
-      else
-        echo "Skipping Ordering.API deploy because no change was detected in the Ordering.API project"
-        exit 1
-      fi;
+    #  else
+    #   echo "Skipping Ordering.API deploy because no change was detected in the Ordering.API project"
+    #    exit 1
+    #  fi;
   dependencies:
     - build_job_ordering
     - test_job_ordering
