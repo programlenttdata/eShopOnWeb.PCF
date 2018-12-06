@@ -1,0 +1,10 @@
+applications:
+- name: eshop-basket-api
+  buildpacks: 
+  - dotnet_core_buildpack
+  instances: 1
+  path: src/Services/Basket/Basket.API/bin/Release/netcoreapp2.1/publish
+  services:
+  - Eureka
+  - Rabbity
+  - RedisCache
