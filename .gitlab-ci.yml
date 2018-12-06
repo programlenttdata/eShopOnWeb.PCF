@@ -187,6 +187,7 @@ deploy_job_ordering:
       - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
   script:
     - |
+      pwd
       cf login -a https://api.run.pivotal.io -u $CF_USERNAME -p $CF_PASSWORD -o NTTD-PCF-RG-org -s eshop
       cf push -f manifest-Ordering.yml
   dependencies:
