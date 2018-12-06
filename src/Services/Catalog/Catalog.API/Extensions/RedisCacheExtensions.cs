@@ -10,7 +10,7 @@ namespace Catalog.API.Extensions
 {
     public static class RedisCacheExtensions
     {
-        public static readonly string KEYS = "KEYS";
+        public static readonly string RedisKeys = "KEYS";
 
         public static async Task<T> TryGetAsync<T>(this IDistributedCache cache, string key)
         {
@@ -18,7 +18,8 @@ namespace Catalog.API.Extensions
 
             if (value != null)
             {
-                return FromByteArray<T>(value);
+                var CacheValue = FromByteArray<T>(value);
+                return CacheValue;
             }
             return default(T);
         }
@@ -55,7 +56,7 @@ namespace Catalog.API.Extensions
 
         public static async Task<bool> RemovePartialAsync<T>(this IDistributedCache cache, List<string> dismissList)
         {
-            var values = await cache.TryGetAsync<List<string>>(KEYS);
+            var values = await cache.TryGetAsync<List<string>>(RedisKeys);
             return await Task.Run(async () => {
                 values.ForEach(async k =>
                 {
@@ -69,7 +70,7 @@ namespace Catalog.API.Extensions
                         }
                     }
                 });
-                await cache.RemoveAsync(KEYS);
+                await cache.RemoveAsync(RedisKeys);
                 return true;
             });            
         }
@@ -101,7 +102,7 @@ namespace Catalog.API.Extensions
 
         private static async void SetKeysAsync(this IDistributedCache cache, string key)
         {
-            var values = await cache.TryGetAsync<List<string>>(KEYS);
+            var values = await cache.TryGetAsync<List<string>>(RedisKeys);
 
             if (values == null)
                 values = new List<string>();
@@ -112,7 +113,7 @@ namespace Catalog.API.Extensions
             }
 
             var array = ToByteArray<List<string>>(values);
-            await cache.SetAsync(KEYS, array);
+            await cache.SetAsync(RedisKeys, array);
         }
     }
 }
