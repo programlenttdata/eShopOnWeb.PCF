@@ -66,15 +66,13 @@ build_job_ordering:
   stage: build
   artifacts:
     paths:
-      - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
+      - 'src/Services/Ordering/Ordering.API/bin/Release/netcoreapp2.1/publish'
   script:
     - |
       #if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
       #  pwd
         cd src/Services/Ordering/Ordering.API
-        dotnet restore
-        dotnet build
-        dotnet publish
+        dotnet publish -c Release
       #else
       #  echo "Skipping Ordering.API build coz no change was detected in the Ordering.API project"
       #  exit 1
@@ -128,7 +126,7 @@ deploy_job_web:
   stage: deploy
   artifacts:
     paths:
-      - 'src/UI/Web/bin/Debug/netcoreapp2.1/publish'
+      - 'src/UI/Web/bin/Release/netcoreapp2.1/publish'
   script:
     - |
       if git diff HEAD~ --name-only|grep src/UI/; then
@@ -184,7 +182,7 @@ deploy_job_ordering:
   stage: deploy
   artifacts:
     paths:
-      - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
+      - 'src/Services/Ordering/Ordering.API/bin/Release/netcoreapp2.1/publish'
   script:
     - |
       pwd

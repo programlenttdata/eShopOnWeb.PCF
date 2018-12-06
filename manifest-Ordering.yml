@@ -2,7 +2,7 @@
 applications:
 - name: eshop-ordering-api
   instances: 1
-  path: Ordering.API/bin/Release/netcoreapp2.1/publish
+  path: src/Services/Ordering/Ordering.API/bin/Release/netcoreapp2.1/publish
   services:
   - serviceregistry
   - rabbitmq
