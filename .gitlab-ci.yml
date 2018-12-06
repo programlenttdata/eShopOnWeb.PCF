@@ -78,7 +78,7 @@ build_job_ordering:
       #else
       #  echo "Skipping Ordering.API build coz no change was detected in the Ordering.API project"
       #  exit 1
-      fi;
+      #fi;
   allow_failure: true
 
 test_job_ordering:
