@@ -8,7 +8,7 @@ applications:
   - rabbitmq
   - mysql1
 
-  name: eshop-ordering-task
+ - name: eshop-ordering-task
   instances: 1
   path: Ordering.BackgroundTasks/bin/Release/netcoreapp2.1/publish
   services:
