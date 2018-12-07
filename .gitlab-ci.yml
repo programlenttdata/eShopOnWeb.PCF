@@ -88,16 +88,16 @@ build_job_ordering:
       - 'src/Services/Ordering/Ordering.API/bin/Debug/netcoreapp2.1/publish'
   script:
     - |
-      #if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
-      #  pwd
+      if git diff HEAD~ --name-only|grep src/Services/Ordering/; then
+        pwd
         cd src/Services/Ordering/Ordering.API
         dotnet restore
         dotnet build
         dotnet publish
-      #else
-      #  echo "Skipping Ordering.API build coz no change was detected in the Ordering.API project"
-      #  exit 1
-      #fi;
+      else
+        echo "Skipping Ordering.API build coz no change was detected in the Ordering.API project"
+        exit 1
+      fi;
   allow_failure: true
 
 test_job_ordering:
