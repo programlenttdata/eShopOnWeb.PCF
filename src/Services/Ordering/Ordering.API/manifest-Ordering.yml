@@ -6,4 +6,4 @@ applications:
   services:
   - Eureka
   - RabbitMQ
-  
+  - mssql1
