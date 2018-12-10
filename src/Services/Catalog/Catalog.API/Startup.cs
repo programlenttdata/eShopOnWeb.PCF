@@ -318,11 +318,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
                     var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
                     var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
-                    var retryCount = 5;
-                    // if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
-                    // {
-                    //     retryCount = int.Parse(configuration["EventBusRetryCount"]);
-                    // }
+                    var retryCount = 3;
                     var rmqlogger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
                     var rabbitMQPersistentConnection = new DefaultRabbitMQPersistentConnection(connectionFactory, rmqlogger, retryCount);
                     return new EventBusRabbitMQ(rabbitMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, subscriptionClientName, retryCount);
