@@ -11,10 +11,10 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Model
     {
         private readonly ILogger<RedisBasketRepository> _logger;
 
-        private readonly ConnectionMultiplexer _redis;
+        private readonly IConnectionMultiplexer _redis;
         private readonly IDatabase _database;
 
-        public RedisBasketRepository(ILoggerFactory loggerFactory, ConnectionMultiplexer redis)
+        public RedisBasketRepository(ILoggerFactory loggerFactory, IConnectionMultiplexer redis)
         {
             _logger = loggerFactory.CreateLogger<RedisBasketRepository>();
             _redis = redis;

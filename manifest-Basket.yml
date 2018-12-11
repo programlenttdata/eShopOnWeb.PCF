@@ -1,10 +1,12 @@
 applications:
-- name: eshop-basket-api
+- name: peterszone-basket-api
   buildpacks: 
   - dotnet_core_buildpack
   instances: 1
+  env: 
+    RequireHttpsMetadata: true
   path: src/Services/Basket/Basket.API/bin/Release/netcoreapp2.1/publish
   services:
   - Eureka
-  - Rabbity
-  - RedisCache
+  - rabbitmqpeter
+  - rediscloudPle

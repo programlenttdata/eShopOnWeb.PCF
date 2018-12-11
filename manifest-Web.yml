@@ -5,7 +5,9 @@ applications:
   path: src/UI/Web/bin/Release/netcoreapp2.1/publish
   env:
     CatalogBaseUrl: https://peterszone-catalog-api.cfapps.io/
+    PurchaseUrl:    https://peterszone-basket-api.cfapps.io/
     IdentityUrl: https://peterszone-identity-api.cfapps.io/
     CallbackUrl: https://peterszone-web-mono.cfapps.io/
+    RequireHttpsMetadata: true
   services:
   - Eureka

@@ -58,42 +58,18 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
 
             services
                 //.AddAppInsight(Configuration)
-                .AddCustomMVC(Configuration)
                 .AddCustomOptions(Configuration)
                 .AddEventBus(Configuration)
                 .AddDiscoveryClient(Configuration)
                 .AddRabbitMQConnection(Configuration)
                 .AddDistributedRedisCache(Configuration)
                 .AddRedisConnectionMultiplexer(Configuration)
+                .AddCustomMVC(Configuration)
                 .AddSwagger();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IBasketRepository, RedisBasketRepository>();
             services.AddTransient<IIdentityService, IdentityService>();
-
-
-            services.AddSingleton<ConnectionMultiplexer>(sp =>
-            {
-                var settings = sp.GetRequiredService<IOptions<BasketSettings>>().Value;
-                //var configuration = ConfigurationOptions.Parse(settings, true);
-
-                //ConfigurationOptions redisconfig = new ConfigurationOptions
-                //{
-                //    ServiceName = "redis",
-                //    EndPoints =
-                //        {
-                //            { "localhost", 6379 }
-                //        },
-                //    Password = "testPassword"
-                //};
-
-                ////configuration.ResolveDns = true;
-
-                //return ConnectionMultiplexer.Connect(redisconfig);
-                return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("redis:client:connectionString"));
-            });
-
-
             services.AddCloudFoundryActuators(Configuration);
 
             var container = new ContainerBuilder();
