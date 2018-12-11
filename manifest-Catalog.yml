@@ -1,14 +1,13 @@
 ---
 applications:
-- name: eshop-catalog-api
+- name: peterszone-catalog-api
   buildpacks: 
   - dotnet_core_buildpack
   instances: 1
-  path: src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish
+  path: src/Services/Catalog/Catalog.API/bin/Release/netcoreapp2.1/publish
   env:
-    PicBaseUrl: https://eshop-catalog-api.cfapps.io/api/v1/catalog/items/[0]/pic/
+    PicBaseUrl: https://peterszone-catalog-api.cfapps.io/api/v1/catalog/items/[0]/pic/
   services:
   - Eureka
-  - RabbitMQ
-  - eshop-catalog-rds-sqlserver
-  - eshop-config-server
+  - rabbitmqpeter
+  - catalog-rds-sqlserver-service
