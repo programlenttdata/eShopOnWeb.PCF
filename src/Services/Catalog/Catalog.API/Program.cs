@@ -6,10 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-//using Pivotal.Extensions.Configuration.ConfigServer;
+using Pivotal.Extensions.Configuration.ConfigServer;
 using System;
 using System.IO;
-using Steeltoe.Extensions.Configuration.CloudFoundry;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API
 {
@@ -34,16 +33,24 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
-                .UseKestrel()
-                .ConfigureAppConfiguration(c => c.AddCloudFoundry())
+                //.UseConfiguration(new ConfigurationBuilder().AddCommandLine(args).Build())
+                //.UseKestrel()
+                //.ConfigureAppConfiguration(c => c.AddCloudFoundry())
                 .UseCloudFoundryHosting()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .AddCloudFoundry()
-                //.AddConfigServer()
+                //.AddCloudFoundry()
+                .AddConfigServer()
                 .UseApplicationInsights()
                 .UseWebRoot("Pics")           
                 .Build();    
     }
 }
+
+/*
+  "rabbitmq": {
+    "client": {
+      "uri": "amqp://guest:guest@localhost:5672/"
+    }
+  },
+*/

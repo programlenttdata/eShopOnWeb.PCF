@@ -36,6 +36,8 @@ using Steeltoe.Management.Endpoint.CloudFoundry;
 using Steeltoe.Common.HealthChecks;
 using Steeltoe.Management.Endpoint.Info;
 using Steeltoe.CloudFoundry.Connector.RabbitMQ;
+using Pivotal.Extensions.Configuration.ConfigServer;
+using Steeltoe.Extensions.Configuration.CloudFoundry;
 
 namespace Microsoft.eShopOnContainers.Services.Catalog.API
 {
@@ -51,6 +53,10 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddAppInsight(Configuration)
+                .AddOptions()
+                .ConfigureConfigServerClientOptions(Configuration)
+                .AddConfiguration(Configuration)
+                .ConfigureCloudFoundryOptions(Configuration)
                 .AddCustomMVC(Configuration)
                 .AddCustomDbContext(Configuration)
                 .AddCustomOptions(Configuration)
@@ -293,7 +299,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
         public static IServiceCollection AddEventBus(this IServiceCollection services, IConfiguration configuration)
         {
-            var subscriptionClientName = configuration["SubscriptionClientName"];
+            var subscriptionClientName = configuration["CatalogQueueName"];
 
             if (configuration.GetValue<bool>("AzureServiceBusEnabled"))
             {
