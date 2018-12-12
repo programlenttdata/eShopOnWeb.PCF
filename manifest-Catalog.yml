@@ -11,3 +11,4 @@ applications:
   - Eureka
   - rabbitmqpeter
   - catalog-rds-sqlserver-service
+  - peterszone-config-server
