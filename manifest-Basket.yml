@@ -10,3 +10,4 @@ applications:
   - Eureka
   - rabbitmqpeter
   - rediscloudPle
+  - peterszone-config-server

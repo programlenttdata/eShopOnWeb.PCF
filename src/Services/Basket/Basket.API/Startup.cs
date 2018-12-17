@@ -40,6 +40,8 @@ using Basket.API.IntegrationEvents.Events;
 using Basket.API.IntegrationEvents.EventHandling;
 using StackExchange.Redis;
 using Microsoft.eShopOnContainers.Services.Basket.API.Services;
+using Pivotal.Extensions.Configuration.ConfigServer;
+using Steeltoe.Extensions.Configuration.CloudFoundry;
 
 namespace Microsoft.eShopOnContainers.Services.Basket.API
 {
@@ -65,6 +67,9 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
                 .AddDistributedRedisCache(Configuration)
                 .AddRedisConnectionMultiplexer(Configuration)
                 .AddCustomMVC(Configuration)
+                .ConfigureConfigServerClientOptions(Configuration)
+                .AddConfiguration(Configuration)
+                .ConfigureCloudFoundryOptions(Configuration)
                 .AddSwagger();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

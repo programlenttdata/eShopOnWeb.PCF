@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0" />
     <PackageReference Include="Pivotal.Discovery.ClientCore" Version="2.1.0" />
+    <PackageReference Include="Pivotal.Extensions.Configuration.ConfigServerCore" Version="2.1.0" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
     <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.4" />
     <PackageReference Include="Steeltoe.CloudFoundry.Connector.EFCore" Version="2.1.0" />

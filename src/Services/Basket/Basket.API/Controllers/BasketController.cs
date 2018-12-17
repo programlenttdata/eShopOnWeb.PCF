@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Options;
+using Pivotal.Extensions.Configuration.ConfigServer;
 
 namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 {
@@ -21,14 +23,20 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         private readonly IBasketRepository _repository;
         private readonly IIdentityService _identitySvc;
         private readonly IEventBus _eventBus;
+        private ConfigServerClientSettingsOptions configServerClientSettingsOptions { get; set; }
 
         public BasketController(IBasketRepository repository,
+            IOptions<ConfigServerClientSettingsOptions> confgServerSettings,
             IIdentityService identityService,
             IEventBus eventBus)
         {
             _repository = repository;
             _identitySvc = identityService;
             _eventBus = eventBus;
+            if (confgServerSettings != null)
+            {
+                configServerClientSettingsOptions = confgServerSettings.Value;
+            }
         }
 
         // GET /id
@@ -89,11 +97,10 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Patch([FromBody]CustomerBasket basketPatch)
         {
-
+            Console.WriteLine(configServerClientSettingsOptions.Settings.Environment);
             var basket = await _repository.GetBasketAsync(basketPatch.BuyerId);
             foreach (var items in  basket.Items)
             {
-                
                 foreach (var patchItems in basketPatch.Items)
                 {
                     if (items.ProductId == patchItems.ProductId)
@@ -107,10 +114,8 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
                     }
                 }
 
-                
-                
             }
-            var baskettoReturn = await _repository.UpdateBasketAsync(basketPatch);
+            await _repository.UpdateBasketAsync(basketPatch);
 
             return Ok(basketPatch);
         }
