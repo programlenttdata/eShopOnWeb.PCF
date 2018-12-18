@@ -11,6 +11,9 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
 
+  config:
+    image: hyness/spring-cloud-config-server
+
   eurekareg:
     image: steeltoeoss/eurekaserver
 
@@ -31,13 +34,15 @@ services:
     depends_on:
       - sql.data
       - eurekareg
-      - rabbitmq    
+      - rabbitmq 
+      - cache 
+      - config  
 
-  web:
-    image: eshop/web:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: src/UI/Web/Dockerfile
-    depends_on:
-      - sql.data
-      - eurekareg
+  # web:
+  #   image: eshop/web:${TAG:-latest}
+  #   build:
+  #     context: .
+  #     dockerfile: src/UI/Web/Dockerfile
+  #   depends_on:
+  #     - sql.data
+  #     - eurekareg

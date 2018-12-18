@@ -1,6 +1,8 @@
 ---
 applications:
 - name: eshop-web-mono
+  buildpacks: 
+  - dotnet_core_buildpack
   instances: 1
   path: src/UI/Web/bin/Release/netcoreapp2.1/publish
   env:
@@ -9,3 +11,4 @@ applications:
     CallbackUrl: https://eshop-web-mono.cfapps.io/
   services:
   - Eureka
+  - CircuitBreaker

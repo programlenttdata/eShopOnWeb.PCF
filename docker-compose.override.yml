@@ -17,6 +17,12 @@ services:
       - "15672:15672" 
       - "5672:5672"   
 
+  config:   
+    environment:
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/programlenttdata/eShopOnWeb.Config.git
+    ports:
+      - "8888:8888"
+
   eurekareg:
     ports:
       - "8761:8761"
@@ -40,6 +46,9 @@ services:
       - PicBaseUrl=http://localhost:5101/api/v1/catalog/items/[0]/pic/   #Local: You need to open your local dev-machine firewall at range 5100-5110.  
       - rabbitmq__client__uri=amqp://guest:guest@rabbitmq:5672/
       - eureka__client__serviceUrl=http://eurekareg:8761/eureka
+      - cloud__config__failFast=True
+      - cloud__config__uri=http://config:8888
+      - CatalogQueueName=Catalog
       - UseCustomizationData=True
       - AzureServiceBusEnabled=False
       - AzureStorageEnabled=False
@@ -49,15 +58,15 @@ services:
       - "5101:80"   # Important: In a production environment your should remove the external port (5101) kept here for microservice debugging purposes. 
                     # The API Gateway redirects and access through the internal port (80).
 
-  web:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://0.0.0.0:80
-      - ConnectionStrings__CatalogConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.CatalogDb;User Id=sa;Password=Pass@word
-      # - ConnectionStrings__IdentityConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.Identity;User Id=sa;Password=Pass@word
-      - CatalogBaseUrl=http://localhost:5101/
-      - IdentityUrl=http://localhost:5105/
-      - CallbackUrl=http://localhost:5100/
-      - eureka__client__serviceUrl=http://eurekareg:8761/eureka
-    ports:
-      - "5100:80"
+  # web:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://0.0.0.0:80
+  #     - ConnectionStrings__CatalogConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.CatalogDb;User Id=sa;Password=Pass@word
+  #     # - ConnectionStrings__IdentityConnection=Server=sql.data;Database=Microsoft.eShopOnWeb.Identity;User Id=sa;Password=Pass@word
+  #     - CatalogBaseUrl=http://localhost:5101/
+  #     - IdentityUrl=http://localhost:5105/
+  #     - CallbackUrl=http://localhost:5100/
+  #     - eureka__client__serviceUrl=http://eurekareg:8761/eureka
+  #   ports:
+  #     - "5100:80"

@@ -30,51 +30,22 @@ namespace Microsoft.eShopWeb.Web.Services
         private readonly ILogger<CatalogService> _logger;
         private readonly string _remoteServiceBaseUrl;
 
+        private readonly Dictionary<string, Catalog> CatalogCache;
+        private readonly Dictionary<string, IEnumerable<SelectListItem>> DataCache;
+
         public CatalogService(HttpClient httpClient, ILogger<CatalogService> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
-
             _remoteServiceBaseUrl = $"{httpClient.BaseAddress}api/v1/catalog/";
-        }
 
-        // public CatalogService(
-        //     ILoggerFactory loggerFactory,
-        //     IRepository<CatalogItem> itemRepository,
-        //     IAsyncRepository<CatalogBrand> brandRepository,
-        //     IAsyncRepository<CatalogType> typeRepository,
-        //     IUriComposer uriComposer)
-        // {
-        //     _logger = loggerFactory.CreateLogger<CatalogService>();
-        //     _itemRepository = itemRepository;
-        //     _brandRepository = brandRepository;
-        //     _typeRepository = typeRepository;
-        //     _uriComposer = uriComposer;
-        // }
+            CatalogCache = new Dictionary<string, Catalog>();
+            DataCache = new Dictionary<string, IEnumerable<SelectListItem>>();
+        }
 
         public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
         {
-            _logger.LogInformation($"Catalog service URL is : {_remoteServiceBaseUrl}");
-            var uri = API.Catalog.GetAllCatalogItems(_remoteServiceBaseUrl, pageIndex, itemsPage, brandId, typeId);
-
-            var responseString = await _httpClient.GetStringAsync(uri);
-
-            var catalog = JsonConvert.DeserializeObject<Catalog>(responseString);
-
-            // var filterSpecification = new CatalogFilterSpecification(brandId, typeId);
-            // var root = _itemRepository.List(filterSpecification);
-
-            // var totalItems = root.Count();
-
-            // var itemsOnPage = root
-            //     .Skip(itemsPage * pageIndex)
-            //     .Take(itemsPage)
-            //     .ToList();
-
-            // itemsOnPage.ForEach(x =>
-            // {
-            //     x.PictureUri = _uriComposer.ComposePicUri(x.PictureUri);
-            // });
+            var catalog = await new GetCatalogCommand(GetCatalogFromServer, GetCatalogFromCache, pageIndex, itemsPage, brandId, typeId).ExecuteAsync();
 
             var vm = new CatalogIndexViewModel()
             {
@@ -104,40 +75,31 @@ namespace Microsoft.eShopWeb.Web.Services
             return vm;
         }
  
-        // public async Task<IEnumerable<SelectListItem>> GetBrands()
-        // {
-        //     _logger.LogInformation("GetBrands called.");
-        //     var brands = await _brandRepository.ListAllAsync();
+        private async Task<Catalog> GetCatalogFromServer(int pageIndex, int itemsPage, int? brandId, int? typeId)
+        {
+            var uri = API.Catalog.GetAllCatalogItems(_remoteServiceBaseUrl, pageIndex, itemsPage, brandId, typeId);
 
-        //     var items = new List<SelectListItem>
-        //     {
-        //         new SelectListItem() { Value = null, Text = "All", Selected = true }
-        //     };
-        //     foreach (CatalogBrand brand in brands)
-        //     {
-        //         items.Add(new SelectListItem() { Value = brand.Id.ToString(), Text = brand.Brand });
-        //     }
+            var responseString = await _httpClient.GetStringAsync(uri);
 
-        //     return items;
-        // }
+            var catalog = JsonConvert.DeserializeObject<Catalog>(responseString);
+            var cachekey = pageIndex.ToString() + itemsPage.ToString() + (brandId.HasValue ? brandId.ToString() : "0") + (typeId.HasValue ? typeId.ToString() : "0");
+            CatalogCache.Add(cachekey, catalog);
 
-        // public async Task<IEnumerable<SelectListItem>> GetTypes()
-        // {
-        //     _logger.LogInformation("GetTypes called.");
-        //     var types = await _typeRepository.ListAllAsync();
-        //     var items = new List<SelectListItem>
-        //     {
-        //         new SelectListItem() { Value = null, Text = "All", Selected = true }
-        //     };
-        //     foreach (CatalogType type in types)
-        //     {
-        //         items.Add(new SelectListItem() { Value = type.Id.ToString(), Text = type.Type });
-        //     }
+            return catalog;
+        }
 
-        //     return items;
-        // }
-        
+        private Task<Catalog> GetCatalogFromCache(int pageIndex, int itemsPage, int? brandId, int? typeId)
+        {
+            var cachekey = pageIndex.ToString() + itemsPage.ToString() + (brandId.HasValue ? brandId.ToString() : "0") + (typeId.HasValue ? typeId.ToString() : "0");
+            return Task.FromResult(CatalogCache[cachekey]);
+        }
+
         public async Task<IEnumerable<SelectListItem>> GetBrands()
+        {
+            return await new GetSelectListItemsCommand(GetBrandsFromServer, GetBrandsFromCache).ExecuteAsync();
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetBrandsFromServer()
         {
             var uri = API.Catalog.GetAllBrands(_remoteServiceBaseUrl);
 
@@ -157,11 +119,24 @@ namespace Microsoft.eShopWeb.Web.Services
                     Text = brand.Value<string>("brand")
                 });
             }
+            
+            DataCache.Add("Brands", items);
 
             return items;
         }
 
+        private Task<IEnumerable<SelectListItem>> GetBrandsFromCache()
+        {
+            return Task.FromResult(DataCache["Brands"]);
+        }
+
         public async Task<IEnumerable<SelectListItem>> GetTypes()
+        {
+            return await new GetSelectListItemsCommand(GetTypesFromServer, GetTypesFromCache).ExecuteAsync();
+
+        }
+        
+        private async Task<IEnumerable<SelectListItem>> GetTypesFromServer()
         {
             var uri = API.Catalog.GetAllTypes(_remoteServiceBaseUrl);
 
@@ -179,8 +154,16 @@ namespace Microsoft.eShopWeb.Web.Services
                     Text = brand.Value<string>("type")
                 });
             }
-
+            
+            DataCache.Add("Types", items);
+            
             return items;
         }
+
+        private Task<IEnumerable<SelectListItem>> GetTypesFromCache()
+        {
+            return Task.FromResult(DataCache["Types"]);
+        }
+        
     }
 }

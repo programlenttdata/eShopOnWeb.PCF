@@ -10,5 +10,6 @@ applications:
   services:
   - Eureka
   - Rabbity
+  # - CircuitBreaker
   - eshop-catalog-rds-sqlserver
   - eshop-config-server

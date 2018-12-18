@@ -7,7 +7,6 @@ using Microsoft.eShopWeb.Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
@@ -21,13 +20,10 @@ using Steeltoe.Common.Discovery;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using Steeltoe.Management.CloudFoundry;
-using Steeltoe.Management.Endpoint.CloudFoundry;
-using Steeltoe.Common.HealthChecks;
-using Steeltoe.Management.Endpoint.Info;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Steeltoe.CircuitBreaker.Hystrix;
 
 namespace Microsoft.eShopWeb.Web
 {
@@ -44,10 +40,6 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddIdentity<ApplicationUser, IdentityRole>()
-            //     .AddEntityFrameworkStores<AppIdentityDbContext>()
-            //     .AddDefaultTokenProviders();
-
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -60,18 +52,17 @@ namespace Microsoft.eShopWeb.Web
                 };
             });
 
-            services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
-            //services.AddDbContext<AppIdentityDbContext>(c => c.UseInMemoryDatabase("Identity"));
+            //services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
 
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
-            services.AddScoped<ICatalogService, CachedCatalogService>();
+            //services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
             services.AddScoped<IBasketViewModelService, BasketViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<CatalogService>();
+            //services.AddScoped<CatalogService>();
             services.Configure<CatalogSettings>(Configuration);
             services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
 
@@ -93,10 +84,6 @@ namespace Microsoft.eShopWeb.Web
             //set 5 min as the lifetime for each HttpMessageHandler int the pool
             services.AddHttpClient("extendedhandlerlifetime").SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-            //add http client services
-
-            //services.AddHttpClient<ICatalogService, CatalogService>();
-
             services.AddMvc();
             services.AddCustomAuthentication(Configuration);
 
@@ -113,6 +100,7 @@ namespace Microsoft.eShopWeb.Web
                 var logger = sp.GetService<ILogger<CatalogService>>();
                 return new CatalogService(httpClient, logger);
             });
+            services.AddHystrixMetricsStream(Configuration);
 
             services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
 
@@ -149,6 +137,8 @@ namespace Microsoft.eShopWeb.Web
             app.UseMvc();
             app.UseCloudFoundryActuators();
             app.UseDiscoveryClient();
+            app.UseHystrixMetricsStream();
+            app.UseHystrixRequestContext();
         }
 
         private void ListAllRegisteredServices(IApplicationBuilder app)
