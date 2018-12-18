@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Microsoft.eShopOnContainers.Services.Ordering.API
 {
@@ -17,7 +18,6 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.ServiceBus;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.eShopOnContainers.BuildingBlocks.EventBus;
     using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
     using BuildingBlocks.EventBusRabbitMQ;
@@ -192,17 +192,25 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
 
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration)
         {
+           var myAction = new  Action<SqlServerDbContextOptionsBuilder>( sqlOptions =>
+            {
+                sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 10,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
             services.AddEntityFrameworkSqlServer()
                    .AddDbContext<OrderingContext>(options =>
-                   {
-                       options.UseSqlServer(configuration);
+                    {
+                             options.UseSqlServer(configuration,myAction);
+
                    },
                        ServiceLifetime.Scoped  //Showing explicitly that the DbContext is shared across the HTTP request scope (graph of objects started in the HTTP request)
                    );
 
             services.AddDbContext<IntegrationEventLogContext>(options =>
             {
-                options.UseSqlServer(configuration);
+                options.UseSqlServer(configuration, myAction);
             });
 
             return services;
