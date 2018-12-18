@@ -6,3 +6,4 @@ applications:
   services:
   - Eureka
   - Rabbity
+  - eshop-ordering-rds-sqlserver
