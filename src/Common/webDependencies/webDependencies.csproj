@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+    <PackageReference Include="Steeltoe.CloudFoundry.ConnectorBase" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
