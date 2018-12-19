@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.eShopOnContainers.Services.Empty;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Microsoft.eShopOnContainers.Services.Ordering.API
@@ -26,6 +28,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
     using Microsoft.eShopOnContainers.BuildingBlocks.IntegrationEventLogEF.Services;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Steeltoe.CloudFoundry.Connector.SqlServer;
     using Microsoft.Extensions.HealthChecks;
     using Microsoft.Extensions.Logging;
     using Pivotal.Discovery.Client;
@@ -58,15 +61,34 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
                 .AddCustomConfiguration(Configuration)
                 .AddEventBus(Configuration)
                 .AddDiscoveryClient(Configuration);
-              //  .AddCustomAuthentication(Configuration);
+            //  .AddCustomAuthentication(Configuration);
 
             //configure autofac
-
+   
             var container = new ContainerBuilder();
             container.Populate(services);
 
             container.RegisterModule(new MediatorModule());
             container.RegisterModule(new ApplicationModule(Configuration["ConnectionString"]));
+            //  this seems counter intuitive, I  created an empty  DBContext so that I can instance it but I only did that so I can get the connectionstring that Steeltoe generated
+            // but the only way to do that is to get the context it bound the sql service options to, the private method GetConnection in the SQlServerDBContextOptionsExtensions isn't available and that value is never exposed
+            // and I couldn't get it from the OrderingContext because it depends on the Imediator Pattern which depends on ApplicationModule which depends on the connection string)
+            string connectionString = "";
+            var scopeFactory = services
+                .BuildServiceProvider()
+                .GetRequiredService<IServiceScopeFactory>();
+
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var provider = scope.ServiceProvider;
+                using (var dbContext = provider.GetRequiredService<EmptyContext>())
+                {
+                    connectionString = dbContext.Database.GetDbConnection().ConnectionString;
+
+                }
+            }
+
+            container.RegisterModule(new ApplicationModule(connectionString));
 
             return new AutofacServiceProvider(container.Build());
         }
@@ -192,7 +214,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
 
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration)
         {
-           var myAction = new  Action<SqlServerDbContextOptionsBuilder>( sqlOptions =>
+            
+            var myAction = new  Action<SqlServerDbContextOptionsBuilder>( sqlOptions =>
             {
                 sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
                 sqlOptions.EnableRetryOnFailure(maxRetryCount: 10,
@@ -202,13 +225,18 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
             services.AddEntityFrameworkSqlServer()
                    .AddDbContext<OrderingContext>(options =>
                     {
-                             options.UseSqlServer(configuration,myAction);
+                             options.UseSqlServer(configuration,  myAction);
 
                    },
                        ServiceLifetime.Scoped  //Showing explicitly that the DbContext is shared across the HTTP request scope (graph of objects started in the HTTP request)
                    );
 
             services.AddDbContext<IntegrationEventLogContext>(options =>
+            {
+                options.UseSqlServer(configuration, myAction);
+            });
+
+            services.AddDbContext<EmptyContext>(options =>
             {
                 options.UseSqlServer(configuration, myAction);
             });

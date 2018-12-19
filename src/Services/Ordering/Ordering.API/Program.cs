@@ -14,8 +14,29 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
 {
     public class Program
     {
+        private const string SQLSERVER_DB = @"
+            {
+                'SqlServer': [
+                  
+                    {
+                        'name': 'SqlServer',
+                        'credentials': {
+                            'ConnectionString': 'server=eshop-ordering-rds.czvirbruk2y4.us-east-1.rds.amazonaws.com;Database=Microsoft.eShopOnContainers.Services.OrderingDb;User Id=eshoporderingapi;Password=Pass@word',
+                            'uid': 'eshoporderingapi',
+                            'uri': 'jdbc:sqlserver://eshop-ordering-rds.czvirbruk2y4.us-east-1.rds.amazonaws.com:1433;databaseName=Microsoft.eShopOnContainers.Services.OrderingDb;',
+                            'db': 'Microsoft.eShopOnContainers.Services.OrderingDb',
+                            'pw': '9XF2Ljg$GjjR'
+                        },
+                        'label': 'sqlserver',
+                        'tags': [
+                            'sqlserver'
+                        ]
+                    }
+                ]
+            }";
         public static void Main(string[] args)
         {
+            Environment.SetEnvironmentVariable("VCAP_SERVICES", SQLSERVER_DB);
             BuildWebHost(args)
                 .MigrateDbContext<OrderingContext>((context, services) =>
                 {
