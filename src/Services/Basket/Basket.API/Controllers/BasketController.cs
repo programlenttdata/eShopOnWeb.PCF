@@ -10,9 +10,12 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Basket.API;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
-using Pivotal.Extensions.Configuration.ConfigServer;
+using Microsoft.Extensions.Configuration;
+using Steeltoe.Extensions.Configuration.ConfigServer;
+//using Pivotal.Extensions.Configuration.ConfigServer;
 
 namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 {
@@ -23,20 +26,17 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         private readonly IBasketRepository _repository;
         private readonly IIdentityService _identitySvc;
         private readonly IEventBus _eventBus;
-        private ConfigServerClientSettingsOptions configServerClientSettingsOptions { get; set; }
-
+        private IConfigurationRoot Config { get; set; }
+        
         public BasketController(IBasketRepository repository,
-            IOptions<ConfigServerClientSettingsOptions> confgServerSettings,
+            IConfigurationRoot config,
             IIdentityService identityService,
             IEventBus eventBus)
         {
             _repository = repository;
             _identitySvc = identityService;
             _eventBus = eventBus;
-            if (confgServerSettings != null)
-            {
-                configServerClientSettingsOptions = confgServerSettings.Value;
-            }
+            Config = config;
         }
 
         // GET /id
@@ -87,6 +87,8 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Post([FromBody]CustomerBasket value)
         {
+           //Console.WriteLine(Config["PicBaseUrl"]);
+           //Console.WriteLine(Config["CatalogQueueName"]);
 
             var basket = await _repository.UpdateBasketAsync(value);
 
@@ -97,7 +99,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Patch([FromBody]CustomerBasket basketPatch)
         {
-            Console.WriteLine(configServerClientSettingsOptions.Settings.Environment);
+            Console.WriteLine(Config["CatalogQueueName"]);
             var basket = await _repository.GetBasketAsync(basketPatch.BuyerId);
             foreach (var items in  basket.Items)
             {

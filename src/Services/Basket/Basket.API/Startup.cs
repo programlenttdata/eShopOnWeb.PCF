@@ -29,6 +29,7 @@ using RabbitMQ.Client;
 using System;
 using System.Data.Common;
 using System.Reflection;
+using Basket.API;
 using Steeltoe.CloudFoundry.Connector.SqlServer.EFCore;
 using Steeltoe.Management.CloudFoundry;
 using Steeltoe.CloudFoundry.Connector.Redis;
@@ -38,6 +39,8 @@ using Steeltoe.Management.Endpoint.Info;
 using Steeltoe.CloudFoundry.Connector.RabbitMQ;
 using Basket.API.IntegrationEvents.Events;
 using Basket.API.IntegrationEvents.EventHandling;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Microsoft.eShopOnContainers.Services.Basket.API.Services;
 using Pivotal.Extensions.Configuration.ConfigServer;
@@ -47,16 +50,27 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            //Configuration = configuration;
+
+            //LoggerFactory logFactory = new LoggerFactory();
+            //logFactory.AddConsole(minLevel: LogLevel.Debug);
+
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables()
+                .AddConfigServer(env);
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-
 
             services
                 //.AddAppInsight(Configuration)
@@ -67,15 +81,19 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
                 .AddDistributedRedisCache(Configuration)
                 .AddRedisConnectionMultiplexer(Configuration)
                 .AddCustomMVC(Configuration)
-                .ConfigureConfigServerClientOptions(Configuration)
+           //     .ConfigureConfigServerClientOptions(Configuration)
                 .AddConfiguration(Configuration)
+                .AddOptions()
                 .ConfigureCloudFoundryOptions(Configuration)
                 .AddSwagger();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<IBasketRepository, RedisBasketRepository>();
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddCloudFoundryActuators(Configuration);
+
+          //  services.Configure<MyConfiguration>(Configuration.GetSection("propertySources").GetSection("source"));
 
             var container = new ContainerBuilder();
             container.Populate(services);
