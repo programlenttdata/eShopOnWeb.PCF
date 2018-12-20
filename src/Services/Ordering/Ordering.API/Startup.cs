@@ -40,7 +40,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
     using System.Data.Common;
     using System.IdentityModel.Tokens.Jwt;
     using System.Reflection;
-
+    using Steeltoe.CloudFoundry.Connector.RabbitMQ;
+    
     public class Startup
     {
         private readonly ILogger<Startup> _logger;
@@ -49,6 +50,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
             _logger = logger;
             Configuration = configuration;
         }
+ 
 
         public IConfiguration Configuration { get; }
 
@@ -75,8 +77,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
        
             container.RegisterModule(new ApplicationModule(connectionString));
             var builder = new SqlConnectionStringBuilder(connectionString);
-
-            _logger.LogInformation("Connection string: " + builder);
+ 
+            _logger.LogInformation($"Connection Host: '{builder.DataSource}' Catalog: '{builder.InitialCatalog}' " );
             return new AutofacServiceProvider(container.Build());
         }
 
@@ -283,34 +285,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
             }
             else
             {
-                services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
-                {
-                    var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
-
-
-                    var factory = new ConnectionFactory()
-                    {
-                        HostName = configuration["EventBusConnection"]
-                    };
-
-                    if (!string.IsNullOrEmpty(configuration["EventBusUserName"]))
-                    {
-                        factory.UserName = configuration["EventBusUserName"];
-                    }
-
-                    if (!string.IsNullOrEmpty(configuration["EventBusPassword"]))
-                    {
-                        factory.Password = configuration["EventBusPassword"];
-                    }
-
-                    var retryCount = 5;
-                    if (!string.IsNullOrEmpty(configuration["EventBusRetryCount"]))
-                    {
-                        retryCount = int.Parse(configuration["EventBusRetryCount"]);
-                    }
-
-                    return new DefaultRabbitMQPersistentConnection(factory, logger, retryCount);
-                });
+                services.AddRabbitMQConnection(configuration);
+                
             }
 
             return services;
@@ -362,7 +338,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
             {
                 services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
                 {
-                    var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                    var connectionFactory = sp.GetRequiredService<ConnectionFactory>();
                     var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                     var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
                     var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
@@ -372,7 +348,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API
                     {
                         retryCount = int.Parse(configuration["EventBusRetryCount"]);
                     }
-
+                    var rmqlogger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
+                    var rabbitMQPersistentConnection = new DefaultRabbitMQPersistentConnection(connectionFactory, rmqlogger, retryCount);
                     return new EventBusRabbitMQ(rabbitMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, subscriptionClientName, retryCount);
                 });
             }
