@@ -38,11 +38,20 @@ services:
       - cache 
       - config  
 
-  # web:
-  #   image: eshop/web:${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: src/UI/Web/Dockerfile
-  #   depends_on:
-  #     - sql.data
-  #     - eurekareg
+  basket.api:
+    image: eshop/basket.api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: src/Services/Basket/Basket.API/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg
+      - rabbitmq
+  web:
+    image: eshop/web:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: src/UI/Web/Dockerfile
+    depends_on:
+      - sql.data
+      - eurekareg

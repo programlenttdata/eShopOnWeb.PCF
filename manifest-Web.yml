@@ -7,8 +7,10 @@ applications:
   path: src/UI/Web/bin/Release/netcoreapp2.1/publish
   env:
     CatalogBaseUrl: https://eshop-catalog-api.cfapps.io/
+    PurchaseUrl: https://eshop-basket-api.cfapps.io/
     IdentityUrl: https://eshop-identity-api.cfapps.io/
     CallbackUrl: https://eshop-web-mono.cfapps.io/
+    RequireHttpsMetadata: true
   services:
   - Eureka
   - CircuitBreaker

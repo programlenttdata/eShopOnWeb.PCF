@@ -1,25 +1,34 @@
-﻿using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using Microsoft.eShopWeb.ApplicationCore.Services;
-using Microsoft.eShopWeb.Infrastructure.Data;
-using Microsoft.eShopWeb.Infrastructure.Identity;
-using Microsoft.eShopWeb.Infrastructure.Logging;
-using Microsoft.eShopWeb.Infrastructure.Services;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+//using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+//using Microsoft.eShopWeb.ApplicationCore.Services;
+using Microsoft.eShopWeb.Comm;
+using Microsoft.eShopWeb.Web.ViewModels;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Text;
-using Microsoft.eShopWeb.Comm;
-using Pivotal.Discovery.Client;
-using Steeltoe.Common.Discovery;
-using System.Net.Http;
 using Microsoft.Extensions.Logging;
+using Pivotal.Discovery.Client;
+using Polly;
+using Polly.Extensions.Http;
+using Steeltoe.Common.Discovery;
 using Steeltoe.Management.CloudFoundry;
+
+using System;
+using System.Net.Http;
+using System.Text;
+
+using Microsoft.Extensions.Options;
+using Steeltoe.CloudFoundry.Connector;
+using Microsoft.eShopWeb.ApplicationCore.Services;
+using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -54,8 +63,8 @@ namespace Microsoft.eShopWeb.Web
 
             //services.AddDbContext<CatalogContext>(c => c.UseInMemoryDatabase("Catalog"));
 
-            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+           // services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            //services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             //services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
@@ -63,11 +72,14 @@ namespace Microsoft.eShopWeb.Web
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             //services.AddScoped<CatalogService>();
-            services.Configure<CatalogSettings>(Configuration);
-            services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
 
-            services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
-            services.AddTransient<IEmailSender, EmailSender>();
+          services.Configure<CatalogSettings>(Configuration);
+
+
+           //  services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
+
+            // services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
+            //   services.AddTransient<IEmailSender, EmailSender>();
 
             // Add memory cache services
             services.AddMemoryCache();
@@ -102,7 +114,19 @@ namespace Microsoft.eShopWeb.Web
             });
             services.AddHystrixMetricsStream(Configuration);
 
-            services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser>();
+            services.AddScoped<IBasketService>(sp =>
+            {
+                var handler = new DiscoveryHttpClientHandler(sp.GetService<IDiscoveryClient>());
+                var httpClient = new HttpClient(handler, false)
+                {
+                    BaseAddress = new Uri(Configuration.GetValue<string>("PurchaseUrl"))
+                };
+                var logger = sp.GetService<ILogger<BasketService>>();
+
+                return new BasketService(httpClient, logger);
+            });
+
+            services.AddTransient<Microsoft.eShopWeb.ApplicationCore.Interfaces.IIdentityParser<ApplicationUser>, IdentityParser>();
 
             _services = services;
         }
@@ -203,6 +227,66 @@ namespace Microsoft.eShopWeb.Web
             });
 
             return services;
+        }
+
+        public static IServiceCollection AddHttpClientServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            //register delegating handlers
+            services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
+            services.AddTransient<HttpClientRequestIdDelegatingHandler>();
+
+            //set 5 min as the lifetime for each HttpMessageHandler int the pool
+            services.AddHttpClient("extendedhandlerlifetime").SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            //add http client services
+            services.AddHttpClient<IBasketService, BasketService>()
+                   .SetHandlerLifetime(TimeSpan.FromMinutes(5))  //Sample. Default lifetime is 2 minutes
+                   .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+                   .AddPolicyHandler(GetRetryPolicy())
+                   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            services.AddHttpClient<ICatalogService, CatalogService>()
+                   .AddPolicyHandler(GetRetryPolicy())
+                   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            ///TODO
+            //services.AddHttpClient<IOrderingService, OrderingService>()
+            //     .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //     .AddHttpMessageHandler<HttpClientRequestIdDelegatingHandler>()
+            //     .AddPolicyHandler(GetRetryPolicy())
+            //     .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //services.AddHttpClient<ICampaignService, CampaignService>()
+            //    .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //    .AddPolicyHandler(GetRetryPolicy())
+            //    .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //services.AddHttpClient<ILocationService, LocationService>()
+            //   .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+            //   .AddPolicyHandler(GetRetryPolicy())
+            //   .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            //add custom application services
+            //services.AddTransient<IIdentityParser<ApplicationUser>, IdentityParser<ApplicationUser>>();
+
+            return services;
+        }
+
+        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        }
+        static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
         }
     }
 }

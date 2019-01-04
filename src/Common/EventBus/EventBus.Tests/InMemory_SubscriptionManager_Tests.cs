@@ -1,4 +1,4 @@
-using Microsoft.eShopOnContainers.BuildingBlocks.EventBus;
+using Microsoft.eShopOnContainers.Common.EventBus;
 using System;
 using System.Linq;
 using Xunit;

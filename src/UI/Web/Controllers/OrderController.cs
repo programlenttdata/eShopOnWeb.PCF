@@ -1,78 +1,85 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.eShopWeb.Web.ViewModels;
-using System;
-using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using System.Linq;
-using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.Web.Services;
+using Microsoft.eShopWeb.Web.ViewModels;
+using Polly.CircuitBreaker;
+using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
     [Authorize]
-    [Route("[controller]/[action]")]
+    [Route("Order/[action]")]
     public class OrderController : Controller
     {
-        private readonly IOrderRepository _orderRepository;
-
-        public OrderController(IOrderRepository orderRepository) {
-            _orderRepository = orderRepository;
-        }
-        
-        public async Task<IActionResult> Index()
+        private IOrderingService _orderSvc;
+        private Microsoft.eShopWeb.Web.Interfaces.IBasketService _basketSvc;
+        private readonly IIdentityParser<ApplicationUser> _appUserParser;
+        public OrderController(IOrderingService orderSvc, Microsoft.eShopWeb.Web.Interfaces.IBasketService basketSvc, IIdentityParser<ApplicationUser> appUserParser)
         {
-            var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
-
-            var viewModel = orders
-                .Select(o => new OrderViewModel()
-                {
-                    OrderDate = o.OrderDate,
-                    OrderItems = o.OrderItems?.Select(oi => new OrderItemViewModel()
-                    {
-                        Discount = 0,
-                        PictureUrl = oi.ItemOrdered.PictureUri,
-                        ProductId = oi.ItemOrdered.CatalogItemId,
-                        ProductName = oi.ItemOrdered.ProductName,
-                        UnitPrice = oi.UnitPrice,
-                        Units = oi.Units
-                    }).ToList(),
-                    OrderNumber = o.Id,
-                    ShippingAddress = o.ShipToAddress,
-                    Status = "Pending",
-                    Total = o.Total()
-
-                });
-            return View(viewModel);
+            _appUserParser = appUserParser;
+            _orderSvc = orderSvc;
+            _basketSvc = basketSvc;
         }
 
-        [HttpGet("{orderId}")]
-        public async Task<IActionResult> Detail(int orderId)
+        public async Task<IActionResult> Create()
         {
-            var customerOrders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
-            var order = customerOrders.FirstOrDefault(o => o.Id == orderId);
-            if (order == null)
+
+            var user = _appUserParser.Parse(HttpContext.User);
+            var order = await _basketSvc.GetOrderDraft(user.Id);
+            var vm = _orderSvc.MapUserInfoIntoOrder(user, order);
+            vm.CardExpirationShortFormat();
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Checkout(Order model)
+        {
+            try
             {
-                return BadRequest("No such order found for this user.");
+                if (ModelState.IsValid)
+                {
+                    var user = _appUserParser.Parse(HttpContext.User);
+                    var basket = _orderSvc.MapOrderToBasket(model);
+
+                    await _basketSvc.Checkout(basket);
+
+                    //Redirect to historic list.
+                    return RedirectToAction("Index");
+                }
             }
-            var viewModel = new OrderViewModel()
+            catch (BrokenCircuitException)
             {
-                OrderDate = order.OrderDate,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemViewModel()
-                {
-                    Discount = 0,
-                    PictureUrl = oi.ItemOrdered.PictureUri,
-                    ProductId = oi.ItemOrdered.CatalogItemId,
-                    ProductName = oi.ItemOrdered.ProductName,
-                    UnitPrice = oi.UnitPrice,
-                    Units = oi.Units
-                }).ToList(),
-                OrderNumber = order.Id,
-                ShippingAddress = order.ShipToAddress,
-                Status = "Pending",
-                Total = order.Total()
-            };
-            return View(viewModel);
+                ModelState.AddModelError("Error", "It was not possible to create a new order, please try later on. (Business Msg Due to Circuit-Breaker)");
+            }
+
+            return View("Create", model);
+        }
+
+        public async Task<IActionResult> Cancel(string orderId)
+        {
+            await _orderSvc.CancelOrder(orderId);
+
+            //Redirect to historic list.
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Detail(string orderId)
+        {
+            var user = _appUserParser.Parse(HttpContext.User);
+
+            var order = await _orderSvc.GetOrder(user, orderId);
+            return View(order);
+        }
+
+        public async Task<IActionResult> Index(Order item)
+        {
+            var user = _appUserParser.Parse(HttpContext.User);
+            var vm = await _orderSvc.GetMyOrders(user);
+            return View(vm);
         }
     }
 }

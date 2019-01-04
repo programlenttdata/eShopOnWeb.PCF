@@ -1,4 +1,4 @@
-﻿namespace Microsoft.eShopOnContainers.BuildingBlocks.EventBusServiceBus
+﻿namespace Microsoft.eShopOnContainers.Common.EventBusServiceBus
 {
     using Microsoft.Azure.ServiceBus;
     using System;

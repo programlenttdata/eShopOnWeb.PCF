@@ -25,14 +25,15 @@ namespace Microsoft.eShopWeb.Infrastructure.Identity
                     CardType = int.Parse(claims.Claims.FirstOrDefault(x => x.Type == "missing")?.Value ?? "0"),
                     City = claims.Claims.FirstOrDefault(x => x.Type == "address_city")?.Value ?? "",
                     Country = claims.Claims.FirstOrDefault(x => x.Type == "address_country")?.Value ?? "",
-                    Email = claims.Claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "",
-                    Id = claims.Claims.FirstOrDefault(x => x.Type == "sub")?.Value ?? "",
+                    Email = claims.Claims.FirstOrDefault(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value ?? "",
+                    Id = claims.Claims.FirstOrDefault(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value ?? "",
                     LastName = claims.Claims.FirstOrDefault(x => x.Type == "last_name")?.Value ?? "",
                     Name = claims.Claims.FirstOrDefault(x => x.Type == "name")?.Value ?? "",
                     PhoneNumber = claims.Claims.FirstOrDefault(x => x.Type == "phone_number")?.Value ?? "",
                     SecurityNumber = claims.Claims.FirstOrDefault(x => x.Type == "card_security_number")?.Value ?? "",
                     State = claims.Claims.FirstOrDefault(x => x.Type == "address_state")?.Value ?? "",
                     Street = claims.Claims.FirstOrDefault(x => x.Type == "address_street")?.Value ?? "",
+                    UserName = claims.Claims.FirstOrDefault(x => x.Type == "preferred_username")?.Value ?? "",
                     ZipCode = claims.Claims.FirstOrDefault(x => x.Type == "address_zip_code")?.Value ?? ""
                 };
             }

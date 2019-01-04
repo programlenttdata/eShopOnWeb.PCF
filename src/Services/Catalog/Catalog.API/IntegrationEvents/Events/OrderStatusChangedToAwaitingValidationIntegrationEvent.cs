@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.eShopOnContainers.Services.Catalog.API.IntegrationEvents.Events
 {
-    using BuildingBlocks.EventBus.Events;
+    using Common.EventBus.Events;
     using System.Collections.Generic;
 
     public class OrderStatusChangedToAwaitingValidationIntegrationEvent : IntegrationEvent
