@@ -68,9 +68,9 @@ namespace Microsoft.eShopWeb.Web
 
             //services.AddScoped<ICatalogService, CachedCatalogService>();
             services.AddScoped<IBasketService, BasketService>();
-            services.AddScoped<IBasketViewModelService, BasketViewModelService>();
-            services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+            //services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+            //services.AddScoped<IOrderService, OrderService>();
+            //services.AddScoped<IOrderRepository, OrderRepository>();
             //services.AddScoped<CatalogService>();
 
           services.Configure<CatalogSettings>(Configuration);
