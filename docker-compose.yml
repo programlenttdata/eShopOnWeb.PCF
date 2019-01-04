@@ -11,6 +11,9 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
 
+  config:
+    image: hyness/spring-cloud-config-server
+
   eurekareg:
     image: steeltoeoss/eurekaserver
 
@@ -31,7 +34,9 @@ services:
     depends_on:
       - sql.data
       - eurekareg
-      - rabbitmq    
+      - rabbitmq 
+      - cache 
+      - config  
 
   basket.api:
     image: eshop/basket.api:${TAG:-latest}

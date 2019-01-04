@@ -4,11 +4,12 @@ applications:
   buildpacks: 
   - dotnet_core_buildpack
   instances: 1
-  path: src/Services/Catalog/Catalog.API/bin/Debug/netcoreapp2.1/publish
-  env:
-    PicBaseUrl: https://eshop-catalog-api.cfapps.io/api/v1/catalog/items/[0]/pic/
+  path: src/Services/Catalog/Catalog.API/bin/Release/netcoreapp2.1/publish
+  # env:
+  #   PicBaseUrl: https://eshop-catalog-api.cfapps.io/api/v1/catalog/items/[0]/pic/
   services:
   - Eureka
-  - RabbitMQ
+  - Rabbity
+  # - CircuitBreaker
   - eshop-catalog-rds-sqlserver
   - eshop-config-server

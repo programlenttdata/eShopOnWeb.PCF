@@ -32,16 +32,19 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:80
       - SqlServer__credentials__ConnectionString=${ESHOP_AZURE_CATALOG_DB:-Server=sql.data;Database=Microsoft.eShopOnContainers.Services.CatalogDb;User Id=sa;Password=Pass@word}
-      - PicBaseUrl=${ESHOP_AZURE_STORAGE_CATALOG_URL:-http://localhost:5101/api/v1/c/catalog/items/[0]/pic/}   #Local: You need to open your local dev-machine firewall at range 5100-5110.  
+      # - PicBaseUrl=${ESHOP_AZURE_STORAGE_CATALOG_URL:-http://localhost:5101/api/v1/c/catalog/items/[0]/pic/}   #Local: You need to open your local dev-machine firewall at range 5100-5110.  
       - rabbitmq__client__uri=amqp://guest:guest@rabbitmq:5672/
       - eureka__client__serviceUrl=http://eurekareg:8761/eureka
-      - AzureStorageAccountName=${ESHOP_AZURE_STORAGE_CATALOG_NAME}
-      - AzureStorageAccountKey=${ESHOP_AZURE_STORAGE_CATALOG_KEY}
+      - cloud__config__failFast=True
+      - cloud__config__uri=http://config:8888
+      - CatalogQueueName=Catalog
+      # - AzureStorageAccountName=${ESHOP_AZURE_STORAGE_CATALOG_NAME}
+      # - AzureStorageAccountKey=${ESHOP_AZURE_STORAGE_CATALOG_KEY}
       - UseCustomizationData=True
-      - AzureServiceBusEnabled=False
-      - AzureStorageEnabled=False
-      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
-      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      # - AzureServiceBusEnabled=False
+      # - AzureStorageEnabled=False
+      # - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      # - OrchestratorType=${ORCHESTRATOR_TYPE}
     ports:
       - "5101:80"   # Important: In a production environment your should remove the external port (5101) kept here for microservice debugging purposes. 
                     # The API Gateway redirects and access through the internal port (80).
