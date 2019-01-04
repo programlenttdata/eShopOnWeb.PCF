@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.2'
 
 services:
   cache:
@@ -36,7 +36,7 @@ services:
   basket.api:
     image: eshop/basket.api:${TAG:-latest}
     volumes:
-      - dbdata:/var/lib
+      - //c/test:/mylib
     build:
       context: .
       dockerfile: src/Services/Basket/Basket.API/Dockerfile
@@ -52,10 +52,3 @@ services:
     depends_on:
       - sql.data
       - eurekareg
-volumes:
-  dbdata:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /work/basketmicro/eshoponweb.pcf/src/services/basket/basket.api/controllers
