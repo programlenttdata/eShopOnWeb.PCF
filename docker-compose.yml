@@ -47,6 +47,7 @@ services:
       - sql.data
       - eurekareg
       - rabbitmq
+      
   web:
     image: eshop/web:${TAG:-latest}
     build:

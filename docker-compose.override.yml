@@ -72,6 +72,7 @@ services:
     ports:
       - "5102:80"   # Important: In a production environment your should remove the external port (5102) kept here for microservice debugging purposes. 
                     # The API Gateway redirects and access through the internal port (80).
+                    
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

@@ -157,7 +157,7 @@ test_job_basket:
     - build_job_basket
   allow_failure: true
 
-  deploy_job_web:
+deploy_job_web:
   stage: deploy
   artifacts:
     paths:
