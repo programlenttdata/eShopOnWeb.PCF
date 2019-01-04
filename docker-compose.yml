@@ -35,6 +35,8 @@ services:
 
   basket.api:
     image: eshop/basket.api:${TAG:-latest}
+    volumes:
+      - //c/work/basketmicro/eshoponweb.pcf/src/services/basket/basket.api:/var/lib
     build:
       context: .
       dockerfile: src/Services/Basket/Basket.API/Dockerfile
