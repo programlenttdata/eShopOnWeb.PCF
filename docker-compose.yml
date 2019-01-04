@@ -36,7 +36,7 @@ services:
   basket.api:
     image: eshop/basket.api:${TAG:-latest}
     volumes:
-      - //c/work/basketmicro/eshoponweb.pcf/src/services/basket/basket.api:/var/lib
+      - dbdata:/var/lib
     build:
       context: .
       dockerfile: src/Services/Basket/Basket.API/Dockerfile
@@ -52,3 +52,10 @@ services:
     depends_on:
       - sql.data
       - eurekareg
+volumes:
+  dbdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /work/basketmicro/eshoponweb.pcf/src/services/basket/basket.api/controllers
